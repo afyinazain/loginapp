@@ -103,7 +103,7 @@ else:
 
     st.markdown("---")
     st.subheader("Quick Actions")
-    col1, col2 = st.columns([1, 1])
+    col1, col2, col3 = st.columns(3)
     
     with col1:
         if st.button("📅 View Schedule"):
@@ -113,6 +113,11 @@ else:
         if st.button("📝 Submit Order"):
             st.switch_page("pages/_New Order.py")
 
+    with col3:
+        if st.button("👤 My Profile"):
+            st.switch_page("pages/_My Profile.py")
+
     if st.button("Logout"):
         st.session_state.user = None
         st.rerun()
+
