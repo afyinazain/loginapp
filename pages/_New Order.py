@@ -71,7 +71,7 @@ def order_popup():
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     quotation_num = generate_quotation_number(INVOICE_SHEET_ID)
     st.text_input("Quotation Number", value=quotation_num, disabled=True)
-    salesperson = st.text_input("Salesperson",value=st.session_state.user["username"])
+    salesperson = st.text_input("Salesperson",value=st.session_state.user["username"],disabled=True)
     email = st.text_input("Documents will be sent to this address",value=st.session_state.user["email_address"],disabled=True)
     nama_pelanggan = st.text_input("Nama Penuh Pelanggan")
     delivery_date = st.date_input("Delivery Date",value=selected_date)
@@ -332,6 +332,7 @@ with st.expander("📦 Availability for the Day", expanded=True):
 
 
                 # ----------------------------
+
 
 
 
