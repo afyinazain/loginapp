@@ -2,7 +2,6 @@
 import streamlit as st
 from utils.sheets import read_sheet
 import pandas as pd
-from streamlit_copy_to_clipboard import st_copy_to_clipboard
 
 
 
@@ -49,3 +48,4 @@ for _, row in all_quotation.iterrows():
             st.write(f"**Total:** RM {float(row['total']):.2f}")
             st.write(f'Salesperson :{row['salesperson']}')
         
+
