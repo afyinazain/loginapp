@@ -46,8 +46,8 @@ data = read_sheet(
 df = pd.DataFrame(data)
 
 
-st.write(f"### ✅ {user_name}'s Order List")
-
+st.write(f"### ✅ My Order List")
+st.write(f"This List Shows Orders With Pending Payment Only")
 data_inv = read_sheet(
     sheet_id=GLIDE_SHEET_ID,
     sheet_name=INVOICE_SHEET_NAME,
@@ -56,9 +56,16 @@ data_inv = read_sheet(
 
 df_inv = pd.DataFrame(data_inv)
 
+df_inv["lookup_pivot3"] = pd.to_numeric(
+    df_inv["lookup_pivot3"],
+    errors="coerce"
+)
+
+
 invoices = df_inv[
     (df_inv["salesperson"] == user_name) &
-    (df_inv["type_status"] == "Invoice")
+    (df_inv["type_status"] == "Invoice") &
+    (df_inv["lookup_pivot3"] > 0)
 ]
 
 if invoices.empty:
@@ -83,7 +90,7 @@ for _, row in invoices.iterrows():
             
     #----------------
 st.divider()
-st.write(f"### ⌛️ {user_name}'s Quotation List")
+st.write(f"### ⌛️ My Active Quotation List")
 df["expiry_date"] = pd.to_datetime(df["expiry_date"], errors="coerce")
 
 quotations = df[
@@ -250,4 +257,5 @@ for _, row in quotations.iterrows():
                     key=f"confirm_btn_{row['quotation_num']}"
                 ):
                     confirm_dialog(row)
+
 
