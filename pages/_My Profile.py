@@ -82,7 +82,7 @@ for _, row in invoices.iterrows():
                
             
     #----------------
-    st.divider()
+st.divider()
 st.write(f"### ⌛️ {user_name}'s Quotation List")
 df["expiry_date"] = pd.to_datetime(df["expiry_date"], errors="coerce")
 
@@ -250,3 +250,4 @@ for _, row in quotations.iterrows():
                     key=f"confirm_btn_{row['quotation_num']}"
                 ):
                     confirm_dialog(row)
+
