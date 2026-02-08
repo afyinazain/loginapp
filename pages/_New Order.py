@@ -126,7 +126,7 @@ def order_popup():
                     "delivery_date": delivery_date_str,
                     "item_1": item_1,
                     "harga_1": harga_1,
-                    "item_2": f"Penghantaran ke {item_2}",
+                    "item_2": f"Caj Penghantaran",
                     "harga_2": harga_2,
                     "item_3": item_3,
                     "harga_3": harga_3,
@@ -151,7 +151,7 @@ def order_popup():
                     "delivery_date": delivery_date_str,
                     "item_1": item_1,
                     "harga_1": harga_1,
-                    "item_2": f"Penghantaran ke {item_2}",
+                    "item_2": f"Caj Penghantaran",
                     "harga_2": harga_2,
                     "item_3": item_3,
                     "harga_3": harga_3,
@@ -332,6 +332,7 @@ with st.expander("📦 Availability for the Day", expanded=True):
 
 
                 # ----------------------------
+
 
 
 
