@@ -43,6 +43,8 @@ def load_data():
     return df
 
 # Filter only INV-R
+
+inventory_df = load_inventory()
 df = load_data()
 df = df[df["TYPE"] == "INV-R"]
 
@@ -280,36 +282,35 @@ INVENTORY = [
 
     
 # Parsing logic
-def extract_products(text):
+def extract_products(text,inventory_list):
     if not isinstance(text, str):
         return set()
 
     text = text.upper()
 
     found = set()
-    for product in INVENTORY:
-        if product in text:
-            found.add(product)
-    
-    return found
+    return {p for p in inventory_list if p in text}
+
+all_inventory = inventory_df["product_name"].unique().tolist()
+
+booked_items_all = set()
+for text in daily_df['item_1'].fillna(''):
+    booked_items_all.update(extract_products(text, all_inventory))
+
+available_items_all = [i for i in all_inventory if i not in booked_items_all]
+unavailable_items = [i for i in INVENTORY if i in booked_items_all]
 
 # ----------------------------
 # Availability + Click Logic
 # ----------------------------
 
-if "selected_product" not in st.session_state:
-    st.session_state.selected_product = None
 
 if "show_popup" not in st.session_state:
     st.session_state.show_popup = False
 
 
-booked_items = set()
-for text in daily_df['item_1'].fillna(''):
-    booked_items.update(extract_products(text))
 
-available_items = [i for i in INVENTORY if i not in booked_items]
-unavailable_items = [i for i in INVENTORY if i in booked_items]
+
 
 # session state for selected product
 if "selected_product" not in st.session_state:
@@ -339,6 +340,7 @@ with st.expander("📦 Availability for the Day", expanded=True):
 
 
                 # ----------------------------
+
 
 
 
