@@ -65,6 +65,14 @@ DROP_POINT_PRICES = {
 }
 
 ACTIVE_BRANCH = ("Nilai", "Kulai", "Pasir Puteh","Peringat")
+active_branch_list = (
+    df_inventory["branch"]
+    .dropna()
+    .unique()
+    .tolist()
+)
+
+active_branch_list.sort()
 
 #-------DEFINE SHEET ID'S---------
 INVOICE_SHEET_ID = "1zAey2gr64Gjc7299BzEDAEJ4dLqd3HIvOIpnXDufddQ" #form2
@@ -91,7 +99,7 @@ def order_popup():
     harga_2 = st.number_input("Caj Penghantaran",value=DROP_POINT_PRICES.get(item_2, 0),step=10)
     item_3 = st.text_input("Item 3")
     harga_3 = st.number_input("Harga 3",step=10)
-    branch = st.selectbox("Branch", ACTIVE_BRANCH)
+    branch = st.selectbox("Branch", active_branch_list)
 
     subtotal = harga_1 + harga_2 + harga_3
     st.write(f"Subtotal: RM{subtotal:.2f}")
@@ -340,6 +348,7 @@ with st.expander("📦 Availability for the Day", expanded=True):
 
 
                 # ----------------------------
+
 
 
 
