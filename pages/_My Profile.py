@@ -44,6 +44,7 @@ data = read_sheet(
     header_row=1
 )
 df = pd.DataFrame(data)
+df["wa_link"]
 
 
 st.write(f"### ✅ My Order List")
@@ -257,5 +258,7 @@ for _, row in quotations.iterrows():
                     key=f"confirm_btn_{row['quotation_num']}"
                 ):
                     confirm_dialog(row)
+                    st.link_button("WhatsApp", row["wa_link"])
+
 
 
