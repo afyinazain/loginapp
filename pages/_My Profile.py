@@ -84,7 +84,8 @@ for _, row in invoices.iterrows():
         with col1:
             st.markdown(f"### 🧾 {row['item_1']} - {row['branch']} ({row['delivery_date']})")
             st.write(f"**Total:** RM {float(row['total']):.2f}")
-
+        with col2:
+            st.link_button("WhatsApp", row["wa_link"])
         
                 
                
@@ -260,6 +261,7 @@ for _, row in quotations.iterrows():
                 ):
                     confirm_dialog(row)
                     
+
 
 
 
