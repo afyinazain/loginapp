@@ -24,8 +24,15 @@ selected_date = st.date_input(
 # TRIGGER DIALOG
 # ----------------------------
 
+@st.cache_data(ttl=60)
+def load_inventory():
+    url_i = "https://docs.google.com/spreadsheets/d/1qw_0cW4ipW5eYh1_sqUyvZdIcjmYXLcsS4J6Y4NoU6A/export?format=csv&gid=2133205329"
+    df_inventory = pd.read_csv(url_i)
 
+    df_inventory["active"] = df_inventory["active"].astype(bool)
+    df_inventory = df_inventory[df_inventory["active"] == True]
 
+    return df_inventory
 
 # Load data
 @st.cache_data(ttl=30)
@@ -332,6 +339,7 @@ with st.expander("📦 Availability for the Day", expanded=True):
 
 
                 # ----------------------------
+
 
 
 
