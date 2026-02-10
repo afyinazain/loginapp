@@ -295,7 +295,7 @@ for text in daily_df['item_1'].fillna(''):
     booked_items_all.update(extract_products(text, all_inventory))
 
 available_items_all = [i for i in all_inventory if i not in booked_items_all]
-unavailable_items = [i for i in all_inventory if i in booked_items_all]
+unavailable_items_all = [i for i in all_inventory if i in booked_items_all]
 
 # ----------------------------
 # Availability + Click Logic
@@ -330,6 +330,7 @@ with st.expander("📦 Availability for the Day", expanded=True):
         for item in available_items:
                if st.code(item, language="", line_numbers=False):
                 st.session_state.selected_product = item
+
 
 
 
