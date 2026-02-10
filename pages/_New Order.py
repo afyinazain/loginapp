@@ -78,7 +78,7 @@ DROP_POINT_PRICES = {
     "Johor":100
 }
 
-ACTIVE_BRANCH = ("Nilai", "Kulai", "Pasir Puteh","Peringat")
+
 active_branch_list = (
     df_inventory["branch"]
     .dropna()
@@ -98,7 +98,7 @@ SCHEDULE_SHEET_ID = "1qw_0cW4ipW5eYh1_sqUyvZdIcjmYXLcsS4J6Y4NoU6A" #auditsoopagl
 
 @st.dialog("📝 New Rental Order")
 def order_popup():
-    st.caption(f"📅 Date: {selected_date}")
+    st.write(f"📅 Delivery Date: {selected_date}")
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     quotation_num = generate_quotation_number(INVOICE_SHEET_ID)
     st.text_input("Quotation Number", value=quotation_num, disabled=True)
@@ -126,7 +126,7 @@ def order_popup():
 
 
     nama_pelanggan = st.text_input("Nama Penuh Pelanggan")
-    delivery_date = st.date_input("Delivery Date",value=selected_date)
+    delivery_date = selected_date
     expiry_date = datetime.today() + timedelta(days=5)
     harga_1 = st.number_input("Harga 1",step=10)
     item_2 = st.selectbox("Lokasi Penghantaran", list(DROP_POINT_PRICES.keys()))
@@ -330,6 +330,7 @@ with st.expander("📦 Availability for the Day", expanded=True):
         for item in available_items_all:
                if st.code(item, language="", line_numbers=False):
                 st.session_state.selected_product = item
+
 
 
 
