@@ -327,9 +327,10 @@ with st.expander("📦 Availability for the Day", expanded=True):
     # ✅ AVAILABLE (CLICKABLE)
     with col2:
         st.markdown("### ✅ Available")
-        for item in available_items:
+        for item in available_items_all:
                if st.code(item, language="", line_numbers=False):
                 st.session_state.selected_product = item
+
 
 
 
