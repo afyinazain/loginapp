@@ -96,6 +96,27 @@ SCHEDULE_SHEET_ID = "1qw_0cW4ipW5eYh1_sqUyvZdIcjmYXLcsS4J6Y4NoU6A" #auditsoopagl
 # POPUP ORDER FORM
 # ----------------------------
 
+
+# Parsing logic
+def extract_products(text,inventory_list):
+    if not isinstance(text, str):
+        return set()
+
+    text = text.upper()
+
+    found = set()
+    return {p for p in inventory_list if p in text}
+
+all_inventory = df_inventory["product_name"].unique().tolist()
+
+booked_items_all = set()
+for text in daily_df['item_1'].fillna(''):
+    booked_items_all.update(extract_products(text, all_inventory))
+
+available_items_all = [i for i in all_inventory if i not in booked_items_all]
+unavailable_items_all = [i for i in all_inventory if i in booked_items_all]
+
+
 @st.dialog("📝 New Rental Order")
 def order_popup():
     st.write(f"## 📅 Delivery Date: {selected_date}")
@@ -290,25 +311,6 @@ st.markdown("""
 
 
     
-# Parsing logic
-def extract_products(text,inventory_list):
-    if not isinstance(text, str):
-        return set()
-
-    text = text.upper()
-
-    found = set()
-    return {p for p in inventory_list if p in text}
-
-all_inventory = df_inventory["product_name"].unique().tolist()
-
-booked_items_all = set()
-for text in daily_df['item_1'].fillna(''):
-    booked_items_all.update(extract_products(text, all_inventory))
-
-available_items_all = [i for i in all_inventory if i not in booked_items_all]
-unavailable_items_all = [i for i in all_inventory if i in booked_items_all]
-
 # ----------------------------
 # Availability + Click Logic
 # ----------------------------
@@ -342,6 +344,7 @@ with st.expander("📦 Availability for the Day", expanded=True):
         for item in available_items_all:
                if st.code(item, language="", line_numbers=False):
                 st.session_state.selected_product = item
+
 
 
 
