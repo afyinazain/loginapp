@@ -29,11 +29,25 @@ def load_inventory():
     url_i = "https://docs.google.com/spreadsheets/d/1qw_0cW4ipW5eYh1_sqUyvZdIcjmYXLcsS4J6Y4NoU6A/export?format=csv&gid=2133205329"
     df_inventory = pd.read_csv(url_i)
 
-    df_inventory["active"] = df_inventory["active"].astype(bool)
-    df_inventory = df_inventory[df_inventory["active"] == True]
+    df_inventory.columns = df_inventory.columns.str.strip().str.lower()
+
+    # safe boolean conversion
+    df_inventory["active"] = (
+        df_inventory["active"]
+        .astype(str)
+        .str.strip()
+        .str.lower()
+        .isin(["true", "1", "yes"])
+    )
+
+    df_inventory = df_inventory[df_inventory["active"]]
+
+    # clean fields
+    df_inventory["branch"] = df_inventory["branch"].astype(str).str.strip()
+    df_inventory["product_name"] = df_inventory["product_name"].astype(str).str.strip().str.upper()
 
     return df_inventory
-
+    
 # Load data
 @st.cache_data(ttl=30)
 def load_data():
@@ -93,7 +107,7 @@ def order_popup():
     
     branch = st.selectbox("Branch", active_branch_list)
     
-    branch_inventory = inventory_df[inventory_df["branch"] == branch]["product_name"].tolist()
+    branch_inventory = df_inventory[df_inventory["branch"] == branch]["product_name"].tolist()
     daily_branch_df = daily_df[daily_df["branch"] == branch]
 
     booked_branch_items = set()
@@ -103,6 +117,7 @@ def order_popup():
     available_branch_items = [
         i for i in branch_inventory if i not in booked_branch_items
     ]
+    
     item_1 = st.selectbox(
     "Item 1",
     available_branch_items,
@@ -325,7 +340,7 @@ for text in daily_df['item_1'].fillna(''):
     booked_items_all.update(extract_products(text, all_inventory))
 
 available_items_all = [i for i in all_inventory if i not in booked_items_all]
-unavailable_items = [i for i in INVENTORY if i in booked_items_all]
+unavailable_items = [i for i in all_inventory if i in booked_items_all]
 
 # ----------------------------
 # Availability + Click Logic
@@ -367,6 +382,7 @@ with st.expander("📦 Availability for the Day", expanded=True):
 
 
                 # ----------------------------
+
 
 
 
