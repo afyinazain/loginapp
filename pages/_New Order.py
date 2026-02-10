@@ -133,6 +133,13 @@ def order_popup():
     harga_2 = st.number_input("Caj Penghantaran",value=DROP_POINT_PRICES.get(item_2, 0),step=10)
     item_3 = st.text_input("Item 3")
     harga_3 = st.number_input("Harga 3",step=10)
+    nama_tempat = st.text_input("Nama Tempat")
+    bil_jam = st.radio(
+    "Durasi",
+    options=["6 Jam","12 Jam", "24 Jam" ,"36 Jam","48 Jam"],
+    index=2,  # default position (0-based)
+    horizontal=True)
+
     
 
     subtotal = harga_1 + harga_2 + harga_3
@@ -186,7 +193,9 @@ def order_popup():
                     "total": total,
                     "type_status": "Quotation",
                     "expiry_date": expiry_date.strftime("%Y-%m-%d"),
-                    "branch": branch
+                    "branch": branch,
+                    "nama_tempat": nama_tempat,
+                    "bil_jam": bil_jam
                 },
                 header_row=1
             )
@@ -210,7 +219,10 @@ def order_popup():
                     "tax": tax,
                     "total": total,
                     "TYPE": "INV-R",
-                    "branch": branch
+                    "type_status": "Quotation",
+                    "branch": branch,
+                    "nama_tempat": nama_tempat,
+                    "bil_jam": bil_jam
                 },
                 header_row=7
             )
@@ -330,6 +342,7 @@ with st.expander("📦 Availability for the Day", expanded=True):
         for item in available_items_all:
                if st.code(item, language="", line_numbers=False):
                 st.session_state.selected_product = item
+
 
 
 
