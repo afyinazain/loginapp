@@ -115,10 +115,23 @@ for text in daily_df['item_1'].fillna(''):
     
 def get_available_all():
     return [i for i in all_inventory if i not in booked_items_all]
+    
+def get_available_by_branch(branch):
+    branch_inventory = df_inventory[
+        df_inventory["branch"] == branch
+    ]["product_name"].tolist()
 
+    daily_branch_df = daily_df[
+        daily_df["branch"] == branch
+    ]
 
+    booked = set()
+    for text in daily_branch_df["item_1"].fillna(""):
+        booked.update(
+            extract_products(text, branch_inventory)
+        )
 
-
+    return [i for i in branch_inventory if i not in booked]
 
 
 available_items_all = [i for i in all_inventory if i not in booked_items_all]
@@ -147,9 +160,11 @@ def order_popup():
         i for i in branch_inventory if i not in booked_branch_items
     ]
     
+    available_branch_items1 = get_available_by_branch(branch)
+
     item_1 = st.selectbox(
     "Item 1",
-    available_branch_items,
+    available_branch_items1,
     placeholder="Choose available item"
     )    
 
@@ -352,6 +367,7 @@ with st.expander("📦 Availability for the Day", expanded=True):
         for item in available_items_all:
                if st.code(item, language="", line_numbers=False):
                 st.session_state.selected_product = item
+
 
 
 
