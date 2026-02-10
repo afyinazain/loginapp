@@ -90,16 +90,35 @@ def order_popup():
     st.text_input("Quotation Number", value=quotation_num, disabled=True)
     salesperson = st.text_input("Salesperson",value=st.session_state.user["username"],disabled=True)
     email = st.text_input("Documents will be sent to this address",value=st.session_state.user["email_address"],disabled=True)
+    
+    branch = st.selectbox("Branch", active_branch_list)
+    
+    branch_inventory = inventory_df[inventory_df["branch"] == branch]["product_name"].tolist()
+    daily_branch_df = daily_df[daily_df["branch"] == branch]
+
+    booked_branch_items = set()
+    for text in daily_branch_df['item_1'].fillna(''):
+        booked_branch_items.update(extract_products(text, branch_inventory))
+    
+    available_branch_items = [
+        i for i in branch_inventory if i not in booked_branch_items
+    ]
+    item_1 = st.selectbox(
+    "Item 1",
+    available_branch_items,
+    placeholder="Choose available item"
+    )    
+
+
     nama_pelanggan = st.text_input("Nama Penuh Pelanggan")
     delivery_date = st.date_input("Delivery Date",value=selected_date)
     expiry_date = datetime.today() + timedelta(days=5)
-    item_1 = st.text_input("Item 1")
     harga_1 = st.number_input("Harga 1",step=10)
     item_2 = st.selectbox("Lokasi Penghantaran", list(DROP_POINT_PRICES.keys()))
     harga_2 = st.number_input("Caj Penghantaran",value=DROP_POINT_PRICES.get(item_2, 0),step=10)
     item_3 = st.text_input("Item 3")
     harga_3 = st.number_input("Harga 3",step=10)
-    branch = st.selectbox("Branch", active_branch_list)
+    
 
     subtotal = harga_1 + harga_2 + harga_3
     st.write(f"Subtotal: RM{subtotal:.2f}")
@@ -348,6 +367,7 @@ with st.expander("📦 Availability for the Day", expanded=True):
 
 
                 # ----------------------------
+
 
 
 
