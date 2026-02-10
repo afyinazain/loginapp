@@ -276,51 +276,6 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-    # Define inventory
-
-INVENTORY = [
-    "BANANA",
-    "HIPPO",
-    "THOMAS",
-    "BOAT",
-    "TWISTER",
-    "BBALL",
-    "LITTLEBALL",
-    "DOLPHIN",
-    "ARIEL",
-    "UNICORN",
-    "FROZEN",
-    "SPIDER",
-    "CANDY",
-    "HULK",
-    "RACING",
-    "COURT",
-    "GATOR",
-    "PRINCESS",
-    "HOTWHEEL",
-    "BUILDER",
-    "ATLANTICA",
-    "MARVEL",
-    "CROCC",
-    "POSEIDON",
-    "PLAYLAND",
-    "ISLAND",
-    "RAMBO",
-    "UNIVERSE",
-    "MEGALODON",
-    "TORNADO",
-    "MINI SPONGEBOB",
-    "MINI TRANSFORMERS",
-    "MINI MAZE",
-    "SPARROW",
-    "TROPICANA",
-    "SPONGEBOB",
-    "TRANSFORMERS",
-    "MAZE HOUSE",
-    "DOMINION",
-    "MICKEY"
-]    
-
 
     
 # Parsing logic
@@ -351,9 +306,6 @@ if "show_popup" not in st.session_state:
     st.session_state.show_popup = False
 
 
-
-
-
 # session state for selected product
 if "selected_product" not in st.session_state:
     st.session_state.selected_product = None
@@ -365,7 +317,7 @@ with st.expander("📦 Availability for the Day", expanded=True):
     # ❌ BOOKED
     with col1:
         st.markdown("### ❌ Booked")
-        for item in unavailable_items:
+        for item in unavailable_items_all:
             st.button(
                 item,
                 key=f"booked_{item}",
@@ -378,10 +330,8 @@ with st.expander("📦 Availability for the Day", expanded=True):
         for item in available_items:
                if st.code(item, language="", line_numbers=False):
                 st.session_state.selected_product = item
-                # Option 1: Show in a text box with a copy button
 
 
-                # ----------------------------
 
 
 
