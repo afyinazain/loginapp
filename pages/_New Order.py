@@ -98,7 +98,7 @@ SCHEDULE_SHEET_ID = "1qw_0cW4ipW5eYh1_sqUyvZdIcjmYXLcsS4J6Y4NoU6A" #auditsoopagl
 
 @st.dialog("📝 New Rental Order")
 def order_popup():
-    st.write(f"📅 Delivery Date: {selected_date}")
+    st.write(f"## 📅 Delivery Date: {selected_date}")
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     quotation_num = generate_quotation_number(INVOICE_SHEET_ID)
     st.text_input("Quotation Number", value=quotation_num, disabled=True)
@@ -330,6 +330,7 @@ with st.expander("📦 Availability for the Day", expanded=True):
         for item in available_items_all:
                if st.code(item, language="", line_numbers=False):
                 st.session_state.selected_product = item
+
 
 
 
