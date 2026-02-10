@@ -44,7 +44,7 @@ def load_data():
 
 # Filter only INV-R
 
-inventory_df = load_inventory()
+df_inventory = load_inventory()
 df = load_data()
 df = df[df["TYPE"] == "INV-R"]
 
@@ -299,7 +299,7 @@ def extract_products(text,inventory_list):
     found = set()
     return {p for p in inventory_list if p in text}
 
-all_inventory = inventory_df["product_name"].unique().tolist()
+all_inventory = df_inventory["product_name"].unique().tolist()
 
 booked_items_all = set()
 for text in daily_df['item_1'].fillna(''):
@@ -348,6 +348,7 @@ with st.expander("📦 Availability for the Day", expanded=True):
 
 
                 # ----------------------------
+
 
 
 
