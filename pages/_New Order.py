@@ -88,6 +88,7 @@ active_branch_list = (
 
 active_branch_list.sort()
 
+
 #-------DEFINE SHEET ID'S---------
 INVOICE_SHEET_ID = "1zAey2gr64Gjc7299BzEDAEJ4dLqd3HIvOIpnXDufddQ" #form2
 SCHEDULE_SHEET_ID = "1qw_0cW4ipW5eYh1_sqUyvZdIcjmYXLcsS4J6Y4NoU6A" #auditsoopaglide
@@ -95,7 +96,7 @@ SCHEDULE_SHEET_ID = "1qw_0cW4ipW5eYh1_sqUyvZdIcjmYXLcsS4J6Y4NoU6A" #auditsoopagl
 # ----------------------------
 # POPUP ORDER FORM
 # ----------------------------
-
+all_inventory = df_inventory["product_name"].unique().tolist()
 
 # Parsing logic
 def extract_products(text,inventory_list):
@@ -107,7 +108,11 @@ def extract_products(text,inventory_list):
     found = set()
     return {p for p in inventory_list if p in text}
 
-all_inventory = df_inventory["product_name"].unique().tolist()
+def get_available_all():
+    return [i for i in all_inventory if i not in booked_items_all]
+
+
+
 
 booked_items_all = set()
 for text in daily_df['item_1'].fillna(''):
@@ -344,6 +349,7 @@ with st.expander("📦 Availability for the Day", expanded=True):
         for item in available_items_all:
                if st.code(item, language="", line_numbers=False):
                 st.session_state.selected_product = item
+
 
 
 
