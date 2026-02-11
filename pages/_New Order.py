@@ -369,12 +369,13 @@ for branch in active_branch_list:
         i for i in branch_inventory if i not in booked
     ]
 
-    with st.expander(f"{branch} — (available) available"):
+    with st.expander(f"{branch} — {len(available)} available"):
         st.write("✅ Available:")
         st.write(", ".join(available) if available else "—")
 
         st.write("❌ Booked:")
         st.write(", ".join(booked) if booked else "—")
+
 
 
 
