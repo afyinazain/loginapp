@@ -175,9 +175,9 @@ def order_popup():
     harga_1 = st.number_input("Harga 1",step=10)
     item_2 = st.selectbox("Lokasi Penghantaran", list(DROP_POINT_PRICES.keys()))
     harga_2 = st.number_input("Caj Penghantaran",value=DROP_POINT_PRICES.get(item_2, 0),step=10)
+    nama_tempat = st.text_input("Nama Tempat")
     item_3 = st.text_input("Item 3")
     harga_3 = st.number_input("Harga 3",step=10)
-    nama_tempat = st.text_input("Nama Tempat")
     bil_jam = st.radio(
     "Durasi",
     options=["6 Jam","12 Jam", "24 Jam" ,"36 Jam","48 Jam"],
@@ -367,6 +367,7 @@ with st.expander("📦 Availability for the Day", expanded=True):
         for item in available_items_all:
                if st.code(item, language="", line_numbers=False):
                 st.session_state.selected_product = item
+
 
 
 
