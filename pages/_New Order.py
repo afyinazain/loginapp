@@ -347,26 +347,36 @@ if "show_popup" not in st.session_state:
 if "selected_product" not in st.session_state:
     st.session_state.selected_product = None
 
-with st.expander("📦 Availability for the Day", expanded=True):
+st.markdown("## 📦 Availability by Branch")
 
-    col1, col2 = st.columns(2)
+for branch in active_branch_list:
 
-    # ❌ BOOKED
-    with col1:
-        st.markdown("### ❌ Booked")
-        for item in unavailable_items_all:
-            st.button(
-                item,
-                key=f"booked_{item}",
-                disabled=True
-            )
+    branch_inventory = df_inventory[
+        df_inventory["branch"] == branch
+    ]["product_name"].tolist()
 
-    # ✅ AVAILABLE (CLICKABLE)
-    with col2:
-        st.markdown("### ✅ Available")
-        for item in available_items_all:
-               if st.code(item, language="", line_numbers=False):
-                st.session_state.selected_product = item
+    daily_branch_df = daily_df[
+        daily_df["branch"].str.strip() == branch
+    ]
+
+    booked = set()
+    for text in daily_branch_df["item_1"].fillna(""):
+        booked.update(
+            extract_products(text, branch_inventory)
+        )
+
+    available = [
+        i for i in branch_inventory if i not in booked
+    ]
+
+    with st.expander(f"{branch} — (available) available"):
+        st.write("✅ Available:")
+        st.write(", ".join(available) if available else "—")
+
+        st.write("❌ Booked:")
+        st.write(", ".join(booked) if booked else "—")
+
+
 
 
 
