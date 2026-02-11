@@ -162,7 +162,7 @@ def order_popup():
     
     available_branch_items1 = get_available_by_branch(branch)
 
-    item_1 = st.selectbox(
+    item_1 = st.multiselect(
     "Item 1",
     available_branch_items1,
     placeholder="Choose available item"
@@ -367,6 +367,7 @@ with st.expander("📦 Availability for the Day", expanded=True):
         for item in available_items_all:
                if st.code(item, language="", line_numbers=False):
                 st.session_state.selected_product = item
+
 
 
 
