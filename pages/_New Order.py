@@ -206,7 +206,7 @@ def order_popup():
     st.write(f"Tax (SST): RM{tax:.2f}")
     st.write(f"Total Amount: RM{total:.2f}")
 
-    delivery_date_str = delivery_date.strftime("%Y-%m-%d")
+    delivery_date_str = delivery_date.strftime("%d-%b-%Y")
     col1, col2 = st.columns(2)    
 
     if col1.button("✅ Submit Quotation"):
@@ -367,6 +367,7 @@ with st.expander("📦 Availability for the Day", expanded=True):
         for item in available_items_all:
                if st.code(item, language="", line_numbers=False):
                 st.session_state.selected_product = item
+
 
 
 
