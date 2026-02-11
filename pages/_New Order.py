@@ -370,11 +370,14 @@ for branch in active_branch_list:
     ]
 
     with st.expander(f"{branch} — {len(available)} available"):
+        st.write("❌ Booked:")
+        st.write(", ".join(booked) if booked else "—")
+        
         st.write("✅ Available:")
         st.write(", ".join(available) if available else "—")
 
-        st.write("❌ Booked:")
-        st.write(", ".join(booked) if booked else "—")
+        
+
 
 
 
