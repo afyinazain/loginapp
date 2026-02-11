@@ -210,7 +210,7 @@ def order_popup():
     col1, col2 = st.columns(2)    
 
     if col1.button("✅ Submit Quotation"):
-        if not item_1 or not delivery_date:
+        if len(item_1) == 0 or not delivery_date:
             st.error("Please fill all required fields")
         else:
                 # Save to Google Sheets
@@ -226,7 +226,7 @@ def order_popup():
                     "salesperson": salesperson,
                     "email": email,
                     "delivery_date": delivery_date_str,
-                    "item_1": item_1,
+                    "item_1": " , ".join(item_1),
                     "harga_1": harga_1,
                     "item_2": f"Caj Penghantaran",
                     "harga_2": harga_2,
@@ -253,7 +253,7 @@ def order_popup():
                     "nama_pelanggan": nama_pelanggan,
                     "salesperson": salesperson,
                     "delivery_date": delivery_date_str,
-                    "item_1": item_1,
+                    "item_1": " , ".join(item_1),
                     "harga_1": harga_1,
                     "item_2": f"Caj Penghantaran",
                     "harga_2": harga_2,
@@ -367,6 +367,7 @@ with st.expander("📦 Availability for the Day", expanded=True):
         for item in available_items_all:
                if st.code(item, language="", line_numbers=False):
                 st.session_state.selected_product = item
+
 
 
 
