@@ -62,7 +62,7 @@ for _, row in df_branch.iterrows():
 
         item = str(row.get("item_1", "") or "")
         customer = str(row.get("nama_pelanggan", "") or "")
-        quotation = str(row.get("quotation_num", "") or "")
+        quotation = str(row.get("invoice_num", "") or "")
         salesperson = str(row.get("salesperson", "") or "")
 
         total = row.get("total", 0)
@@ -118,6 +118,7 @@ if calendar_event and "eventClick" in calendar_event:
     st.write("🧾 Quotation:", event_data["extendedProps"]["quotation"])
     st.write("👤 Salesperson:", event_data["extendedProps"]["salesperson"])
     st.write("💰 Total:", event_data["extendedProps"]["total"])
+
 
 
 
