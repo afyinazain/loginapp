@@ -37,10 +37,16 @@ df = load_schedule_data()
 # ---------------------------------
 branch_list = sorted(df["branch"].dropna().unique().tolist())
 
-selected_branch = st.selectbox(
+default_branch = branch_list.index(st.session_state.user["branch"]) \
+    if st.session_state.user.get("branch") in branch_list else 0
+
+selected_branch = st.radio(
     "🏢 Select Branch",
-    branch_list
+    branch_list,
+    index=default_branch,
+    horizontal=True
 )
+
 
 # Filter by branch
 df_branch = df[df["branch"] == selected_branch]
@@ -118,6 +124,7 @@ if calendar_event and "eventClick" in calendar_event:
     st.write("🧾 Quotation:", event_data["extendedProps"]["quotation"])
     st.write("👤 Salesperson:", event_data["extendedProps"]["salesperson"])
     st.write("💰 Total:", event_data["extendedProps"]["total"])
+
 
 
 
