@@ -60,12 +60,6 @@ for _, row in df_branch.iterrows():
 
     if pd.notna(row["delivery_date"]):
 
-        events = []
-
-for _, row in df_branch.iterrows():
-
-    if pd.notna(row["delivery_date"]):
-
         item = str(row.get("item_1", "") or "")
         bil_jam = str(row.get("bil_jam", "") or "")
         quotation = str(row.get("invoice_num", "") or "")
@@ -92,32 +86,38 @@ for _, row in df_branch.iterrows():
 st.markdown("""
 <style>
 
-/* Make month grid 3 columns instead of 7 */
-.fc .fc-daygrid-body table {
-    table-layout: fixed !important;
-}
-
-.fc .fc-daygrid-body tr {
+/* Force 3 columns layout */
+.fc .fc-daygrid-body {
     display: grid !important;
     grid-template-columns: repeat(3, 1fr) !important;
+    gap: 6px;
 }
 
-/* Hide empty overflow cells */
+/* Make each day card look like a box */
 .fc .fc-daygrid-day {
-    min-height: 100px;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 8px;
+    padding: 4px;
+    min-height: 110px;
 }
 
-/* Make text smaller for mobile */
-.fc .fc-daygrid-day-number {
-    font-size: 12px;
+/* Hide weekday header row */
+.fc .fc-col-header {
+    display: none !important;
 }
 
+/* Adjust event text size for mobile */
 .fc-event {
     font-size: 10px;
     padding: 2px;
 }
 
-/* Improve spacing */
+/* Smaller day number */
+.fc .fc-daygrid-day-number {
+    font-size: 12px;
+}
+
+/* Better mobile toolbar */
 .fc .fc-toolbar-title {
     font-size: 16px;
 }
@@ -160,6 +160,7 @@ if calendar_event and "eventClick" in calendar_event:
     st.write("🧾 Quotation:", event_data["extendedProps"]["quotation"])
     st.write("👤 Salesperson:", event_data["extendedProps"]["salesperson"])
     st.write("💰 Total:", event_data["extendedProps"]["total"])
+
 
 
 
