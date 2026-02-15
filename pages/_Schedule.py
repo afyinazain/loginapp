@@ -162,6 +162,59 @@ if calendar_event and "eventClick" in calendar_event:
     st.write("💰 Total:", event_data["extendedProps"]["total"])
 
 
+import calendar as cal
+from datetime import date
+
+st.subheader(f"📆 Schedule for {selected_branch}")
+
+today = datetime.today()
+year = today.year
+month = today.month
+
+# Get all dates in this month
+month_dates = cal.monthcalendar(year, month)
+
+# Flatten and remove zeros
+flat_dates = [day for week in month_dates for day in week if day != 0]
+
+# Convert events into dictionary by date
+events_by_date = {}
+
+for _, row in df_branch.iterrows():
+    if pd.notna(row["delivery_date"]):
+        d = row["delivery_date"].date()
+        events_by_date.setdefault(d, []).append(row)
+
+# Display 3-column grid
+cols = st.columns(3)
+
+for i, day in enumerate(flat_dates):
+    current_date = date(year, month, day)
+
+    with cols[i % 3]:
+        st.markdown(f"### {day}")
+
+        if current_date in events_by_date:
+            for event in events_by_date[current_date]:
+                item = str(event.get("item_1", ""))
+                bil_jam = str(event.get("bil_jam", ""))
+
+                st.markdown(
+                    f"""
+                    <div style="
+                        background:#18c936;
+                        padding:6px;
+                        border-radius:6px;
+                        font-size:12px;
+                        margin-bottom:4px;">
+                        {item} - {bil_jam}
+                    </div>
+                    """,
+                    unsafe_allow_html=True
+                )
+        else:
+            st.write("—")
+
 
 
 
