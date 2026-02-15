@@ -94,13 +94,20 @@ for _, row in df_branch.iterrows():
 # CALENDAR OPTIONS
 # ---------------------------------
 calendar_options = {
-    "initialView": "dayGridMonth",
-    "height": 650,
+    "initialView": "timeGridThreeDay",
+    "height": 700,
     "headerToolbar": {
         "left": "prev,next today",
-        "center": "title",
-        "right": "dayGridMonth,timeGridWeek,timeGridDay"
+        "center": "title"
+        
     },
+    "views": {
+        "timeGridThreeDay": {
+            "type": "timeGrid",
+            "duration": {"days": 3},
+            "buttonText": "3 Days"
+        }
+    }
 }
 
 # ---------------------------------
@@ -124,6 +131,7 @@ if calendar_event and "eventClick" in calendar_event:
     st.write("🧾 Quotation:", event_data["extendedProps"]["quotation"])
     st.write("👤 Salesperson:", event_data["extendedProps"]["salesperson"])
     st.write("💰 Total:", event_data["extendedProps"]["total"])
+
 
 
 
