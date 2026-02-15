@@ -61,7 +61,7 @@ for _, row in df_branch.iterrows():
     if pd.notna(row["delivery_date"]):
 
         item = str(row.get("item_1", "") or "")
-        customer = str(row.get("nama_pelanggan", "") or "")
+        bil_jam = str(row.get("bil_jam", "") or "")
         quotation = str(row.get("invoice_num", "") or "")
         salesperson = str(row.get("salesperson", "") or "")
 
@@ -70,7 +70,7 @@ for _, row in df_branch.iterrows():
             total = 0
 
         event = {
-            "title": f"{item} - {quotation}",
+            "title": f"{item} - {bil_jam}",
             "start": row["delivery_date"].strftime("%Y-%m-%d"),
             "end": row["delivery_date"].strftime("%Y-%m-%d"),
             "color": "#18c936",
@@ -118,6 +118,7 @@ if calendar_event and "eventClick" in calendar_event:
     st.write("🧾 Quotation:", event_data["extendedProps"]["quotation"])
     st.write("👤 Salesperson:", event_data["extendedProps"]["salesperson"])
     st.write("💰 Total:", event_data["extendedProps"]["total"])
+
 
 
 
