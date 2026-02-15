@@ -171,13 +171,10 @@ today = datetime.today()
 year = today.year
 month = today.month
 
-# Get all dates in this month
 month_dates = cal.monthcalendar(year, month)
-
-# Flatten and remove zeros
 flat_dates = [day for week in month_dates for day in week if day != 0]
 
-# Convert events into dictionary by date
+# Convert events into dictionary
 events_by_date = {}
 
 for _, row in df_branch.iterrows():
@@ -185,40 +182,51 @@ for _, row in df_branch.iterrows():
         d = row["delivery_date"].date()
         events_by_date.setdefault(d, []).append(row)
 
-# Display 3-column grid
-cols = st.columns(3)
+# START GRID
+html = """
+<div style="
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+">
+"""
 
-for i, day in enumerate(flat_dates):
+for day in flat_dates:
     current_date = date(year, month, day)
 
-    with cols[i % 3]:
-        st.markdown(f"### {day}")
+    html += """
+    <div style="
+        border:1px solid rgba(255,255,255,0.1);
+        border-radius:10px;
+        padding:6px;
+        min-height:100px;
+        background:rgba(255,255,255,0.03);
+    ">
+    """
 
-        if current_date in events_by_date:
-            for event in events_by_date[current_date]:
-                item = str(event.get("item_1", ""))
-                bil_jam = str(event.get("bil_jam", ""))
+    html += f"<b>{day}</b><br>"
 
-                st.markdown(
-                    f"""
-                    <div style="
-                        background:#18c936;
-                        padding:6px;
-                        border-radius:6px;
-                        font-size:12px;
-                        margin-bottom:4px;">
-                        {item} - {bil_jam}
-                    </div>
-                    """,
-                    unsafe_allow_html=True
-                )
-        else:
-            st.write("—")
+    if current_date in events_by_date:
+        for event in events_by_date[current_date]:
+            item = str(event.get("item_1", ""))
+            bil_jam = str(event.get("bil_jam", ""))
 
+            html += f"""
+            <div style="
+                background:#18c936;
+                padding:4px;
+                border-radius:6px;
+                font-size:10px;
+                margin-top:4px;
+            ">
+            {item} - {bil_jam}
+            </div>
+            """
+    else:
+        html += "<div style='opacity:0.3;font-size:12px;'>—</div>"
 
+    html += "</div>"
 
+html += "</div>"
 
-
-
-
-
+st.markdown(html, unsafe_allow_html=True)
