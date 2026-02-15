@@ -54,19 +54,35 @@ for _, row in df_branch.iterrows():
 
     if pd.notna(row["delivery_date"]):
 
+        events = []
+
+for _, row in df_branch.iterrows():
+
+    if pd.notna(row["delivery_date"]):
+
+        item = str(row.get("item_1", "") or "")
+        customer = str(row.get("nama_pelanggan", "") or "")
+        quotation = str(row.get("quotation_num", "") or "")
+        salesperson = str(row.get("salesperson", "") or "")
+
+        total = row.get("total", 0)
+        if pd.isna(total):
+            total = 0
+
         event = {
-            "title": f"{row['item_1']} - {row['nama_pelanggan']}",
+            "title": f"{item} - {customer}",
             "start": row["delivery_date"].strftime("%Y-%m-%d"),
             "end": row["delivery_date"].strftime("%Y-%m-%d"),
-            "color": "#d32f2f",  # red
+            "color": "#d32f2f",
             "extendedProps": {
-                "quotation": row.get("quotation_num", ""),
-                "salesperson": row.get("salesperson", ""),
-                "total": row.get("total", "")
+                "quotation": quotation,
+                "salesperson": salesperson,
+                "total": float(total)
             }
         }
 
         events.append(event)
+
 
 # ---------------------------------
 # CALENDAR OPTIONS
@@ -102,3 +118,4 @@ if calendar_event and "eventClick" in calendar_event:
     st.write("🧾 Quotation:", event_data["extendedProps"]["quotation"])
     st.write("👤 Salesperson:", event_data["extendedProps"]["salesperson"])
     st.write("💰 Total:", event_data["extendedProps"]["total"])
+
