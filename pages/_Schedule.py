@@ -70,10 +70,10 @@ for _, row in df_branch.iterrows():
             total = 0
 
         event = {
-            "title": f"{item} - {customer}",
+            "title": f"{item} - {quotation}",
             "start": row["delivery_date"].strftime("%Y-%m-%d"),
             "end": row["delivery_date"].strftime("%Y-%m-%d"),
-            "color": "#d32f2f",
+            "color": "#42f560",
             "extendedProps": {
                 "quotation": quotation,
                 "salesperson": salesperson,
@@ -118,4 +118,5 @@ if calendar_event and "eventClick" in calendar_event:
     st.write("🧾 Quotation:", event_data["extendedProps"]["quotation"])
     st.write("👤 Salesperson:", event_data["extendedProps"]["salesperson"])
     st.write("💰 Total:", event_data["extendedProps"]["total"])
+
 
