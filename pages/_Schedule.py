@@ -89,24 +89,53 @@ for _, row in df_branch.iterrows():
 
         events.append(event)
 
+st.markdown("""
+<style>
+
+/* Make month grid 3 columns instead of 7 */
+.fc .fc-daygrid-body table {
+    table-layout: fixed !important;
+}
+
+.fc .fc-daygrid-body tr {
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+}
+
+/* Hide empty overflow cells */
+.fc .fc-daygrid-day {
+    min-height: 100px;
+}
+
+/* Make text smaller for mobile */
+.fc .fc-daygrid-day-number {
+    font-size: 12px;
+}
+
+.fc-event {
+    font-size: 10px;
+    padding: 2px;
+}
+
+/* Improve spacing */
+.fc .fc-toolbar-title {
+    font-size: 16px;
+}
+
+</style>
+""", unsafe_allow_html=True)
+
 
 # ---------------------------------
 # CALENDAR OPTIONS
 # ---------------------------------
 calendar_options = {
-    "initialView": "timeGridThreeDay",
-    "height": 700,
+    "initialView": "dayGridMonth",
+    "height": 650,
     "headerToolbar": {
         "left": "prev,next today",
-        "center": "title"
-        
-    },
-    "views": {
-        "timeGridThreeDay": {
-            "type": "timeGrid",
-            "duration": {"days": 3},
-            "buttonText": "3 Days"
-        }
+        "center": "title",
+        "right": ""
     }
 }
 
@@ -131,6 +160,7 @@ if calendar_event and "eventClick" in calendar_event:
     st.write("🧾 Quotation:", event_data["extendedProps"]["quotation"])
     st.write("👤 Salesperson:", event_data["extendedProps"]["salesperson"])
     st.write("💰 Total:", event_data["extendedProps"]["total"])
+
 
 
 
