@@ -137,8 +137,10 @@ def confirm_dialog(row):
         )
     nama_pelanggan = st.text_input("Nama Penuh Pelanggan", value=row.get("nama_pelanggan", ""))
     no_tel = st.text_input("No. Tel / Whatsapp", value=row.get("no_tel", ""))
-    no_tin = st.text_input("No TIN / No IC / Email", value=row.get("no_tin", ""))
+    no_tin = st.text_input("Alamat / No TIN / No IC / Email", value=row.get("no_tin", ""))
+    nama_tempat = st.text_input("Nama Tempat", value=row.get("nama_tempat",""))
     link_location = st.text_input("Location URL (Maps/Waze)",value=row.get("link_location", ""))
+    bil_jam = 0
     item_1 = st.text_input("Item 1", value=row.get("item_1", ""))
     harga_1 = st.number_input("Harga 1", value=float(row.get("harga_1", 0)))
     item_2 = st.text_input("Item 2", value=row.get("item_2", ""))
@@ -201,6 +203,8 @@ def confirm_dialog(row):
         ws1.update_cell(sheet_row1, df.columns.get_loc("subtotal") + 1, subtotal)
         ws1.update_cell(sheet_row1, df.columns.get_loc("tax") + 1, tax)
         ws1.update_cell(sheet_row1, df.columns.get_loc("total") + 1, total)
+        ws1.update_cell(sheet_row1, df.columns.get_loc("nama_tempat") + 1, nama_tempat)
+        ws1.update_cell(sheet_row1, df.columns.get_loc("bil_jam") + 1, bil_jam)
 
 
         cell2 = ws2.find(row["quotation_num"])
@@ -228,6 +232,8 @@ def confirm_dialog(row):
         ws2.update_cell(sheet_row2, df2.columns.get_loc("subtotal") + 1, subtotal)
         ws2.update_cell(sheet_row2, df2.columns.get_loc("tax") + 1, tax)
         ws2.update_cell(sheet_row2, df2.columns.get_loc("total") + 1, total)
+        ws2.update_cell(sheet_row2, df2.columns.get_loc("nama_tempat") + 1, nama_tempat)
+        ws2.update_cell(sheet_row2, df2.columns.get_loc("bil_jam") + 1, bil_jam)
 
         st.success(f"🎉 Invoice {invoice_num} created")
         st.rerun()
@@ -261,6 +267,7 @@ for _, row in quotations.iterrows():
                 ):
                     confirm_dialog(row)
                     
+
 
 
 
