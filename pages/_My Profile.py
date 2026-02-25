@@ -140,7 +140,7 @@ def confirm_dialog(row):
     no_tin = st.text_input("Alamat / No TIN / No IC / Email", value=row.get("no_tin", ""))
     nama_tempat = st.text_input("Nama Tempat", value=row.get("nama_tempat",""))
     link_location = st.text_input("Location URL (Maps/Waze)",value=row.get("link_location", ""))
-    bil_jam = st.radio("Durasi",options=["6 Jam","12 Jam", "24 Jam" ,"36 Jam","48 Jam"],value=row.get("bil_jam",""),horizontal=True)
+    bil_jam = st.text_input("Durasi",value=row.get("bil_jam",""))
     item_1 = st.text_input("Item 1", value=row.get("item_1", ""))
     harga_1 = st.number_input("Harga 1", value=float(row.get("harga_1", 0)))
     item_2 = st.text_input("Item 2", value=row.get("item_2", ""))
@@ -267,6 +267,7 @@ for _, row in quotations.iterrows():
                 ):
                     confirm_dialog(row)
                     
+
 
 
 
