@@ -175,7 +175,7 @@ def order_popup():
     harga_1 = st.number_input("Harga 1",step=10)
     item_2 = st.selectbox("Lokasi Penghantaran", list(DROP_POINT_PRICES.keys()))
     harga_2 = st.number_input("Caj Penghantaran",value=DROP_POINT_PRICES.get(item_2, 0),step=10)
-    nama_tempat = st.text_input("Nama Tempat")
+    
     item_3 = st.text_input("Item 3")
     harga_3 = st.number_input("Harga 3",step=10)
     bil_jam = st.radio(
@@ -183,7 +183,7 @@ def order_popup():
     options=["6 Jam","12 Jam", "24 Jam" ,"36 Jam","48 Jam"],
     index=2,  # default position (0-based)
     horizontal=True)
-
+    nama_tempat = st.text_input("Nama Ringkas Tempat (Cth : Kuala Lumpur, JB, KB, etc)")
     
 
     subtotal = harga_1 + harga_2 + harga_3
@@ -377,6 +377,7 @@ for branch in active_branch_list:
         st.write(", ".join(available) if available else "—")
 
         
+
 
 
 
