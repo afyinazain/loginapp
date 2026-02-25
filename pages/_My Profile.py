@@ -138,7 +138,7 @@ def confirm_dialog(row):
     nama_pelanggan = st.text_input("Nama Penuh Pelanggan", value=row.get("nama_pelanggan", ""))
     no_tel = st.text_input("No. Tel / Whatsapp", value=row.get("no_tel", ""))
     no_tin = st.text_input("Alamat / No TIN / No IC / Email", value=row.get("no_tin", ""))
-    nama_tempat = st.text_input("Nama Tempat", value=row.get("nama_tempat",""))
+    nama_tempat = st.text_input("Nama Tempat (Cth: KL, Hulu Langat, KB, dll)", value=row.get("nama_tempat",""))
     link_location = st.text_input("Location URL (Maps/Waze)",value=row.get("link_location", ""))
     bil_jam = st.text_input("Durasi",value=row.get("bil_jam",""))
     item_1 = st.text_input("Item 1", value=row.get("item_1", ""))
@@ -267,6 +267,7 @@ for _, row in quotations.iterrows():
                 ):
                     confirm_dialog(row)
                     
+
 
 
 
