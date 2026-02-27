@@ -78,15 +78,14 @@ if invoices.empty:
 
 for _, row in invoices.iterrows():
     
-    with st.container(border=True):
-        col1, col2 = st.columns([4, 1])
+    with st.expander(
+        f"{row['item_1']} {row['bil_jam']} | {row['nama_tempat']} | {row['delivery_date']}"
+    ):
+        st.write(f"Branch: {row['branch']}")
+        st.write(f"Total: RM {float(row['total']):.2f}")
+        st.markdown(f'<a href="{row["wa_link"]}" target="_blank">📲 WhatsApp</a>',unsafe_allow_html=True)
 
-        with col1:
-            st.markdown(f"### 🧾 {row['item_1']} - {row['branch']} ({row['delivery_date']})")
-            st.write(f"**Total:** RM {float(row['total']):.2f}")
-        with col2:
-            st.link_button("WhatsApp", row["wa_link"])
-        
+    
 st.divider()
 
 
@@ -331,6 +330,7 @@ for _, row in quotations.iterrows():
             
 
                     
+
 
 
 
