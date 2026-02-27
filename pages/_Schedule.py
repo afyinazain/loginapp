@@ -69,43 +69,33 @@ branch_colors = {
 events = []
 
 for _, row in df_branch.iterrows():
-    
-    branch = row["branch"]
-    color = branch_colors.get(branch, "#18c936")
-    event = {"title": f"{item} - {bil_jam}",
-            "start": row["delivery_date"].strftime("%Y-%m-%d"),
-            "end": row["delivery_date"].strftime("%Y-%m-%d"),
-            "color": color,
-                
     if pd.notna(row["delivery_date"]):
-
         item = str(row.get("item_1", "") or "")
         bil_jam = str(row.get("bil_jam", "") or "")
         quotation = str(row.get("invoice_num", "") or "")
         salesperson = str(row.get("salesperson", "") or "")
-
         total = row.get("total", 0)
         if pd.isna(total):
             total = 0
+
+        branch = row.get("branch", "")
+        color = branch_colors.get(branch, "#18c936")
 
         event = {
             "title": f"{item} - {bil_jam}",
             "start": row["delivery_date"].strftime("%Y-%m-%d"),
             "end": row["delivery_date"].strftime("%Y-%m-%d"),
-            "color": "#18c936",
+            "color": color,
             "extendedProps": {
                 "quotation": quotation,
                 "salesperson": salesperson,
-                "total": float(total)
+                "total": float(total),
+                "branch": branch
             }
         }
 
         events.append(event)
 
-        
-        
-            }
-    
 
 st.markdown("""
 <style>
@@ -240,3 +230,5 @@ for i, day in enumerate(flat_dates):
             st.write("—")
 
 
+
+#----------------
