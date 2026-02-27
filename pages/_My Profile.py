@@ -307,14 +307,27 @@ def confirm_dialog(row):
 # ----------------------------
 
 for _, row in quotations.iterrows():
-
+    
+    expired = (
+        pd.notna(row["expiry_date"]) and
+        datetime.today() > row["expiry_date"]
+    )
     with st.expander(
-        f"{row['quotation_num']} | {row['item_1']} | RM {float(row['total']):.2f}"
+        f"{row['item_1']} {row['bil_jam']} | {row['nama_tempat']} | {row['delivery_date']}"
     ):
         st.write(f"Branch: {row['branch']}")
-        st.write(f"Delivery: {row['delivery_date']}")
-        if st.button("Confirm", key=row["quotation_num"]):
-            confirm_dialog(row)
+        st.write(f"Total: RM {float(row['total']):.2f}")
+        st.link_button("WhatsApp", row["wa_link"])
+
+            if expired:
+                st.error("❌ Expired")
+                
+            if not expired:
+                if st.button(
+                    "Confirm",
+                    key=f"confirm_btn_{row['quotation_num']}"
+                ):
+                    confirm_dialog(row)
             
 for _, row in quotations.iterrows():
 
@@ -342,6 +355,7 @@ for _, row in quotations.iterrows():
                 ):
                     confirm_dialog(row)
                     
+
 
 
 
