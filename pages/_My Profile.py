@@ -111,6 +111,13 @@ def load_inventory():
     df_inventory["product_name"] = df_inventory["product_name"].astype(str).str.strip().str.upper()
 
     return df_inventory
+    
+@st.cache_data(ttl=30)
+def load_data():
+    url = "https://docs.google.com/spreadsheets/d/1qw_0cW4ipW5eYh1_sqUyvZdIcjmYXLcsS4J6Y4NoU6A/export?format=csv&gid=1912796754"
+    df = pd.read_csv(url, header=6)
+    df["delivery_date"] = pd.to_datetime(df["delivery_date"], errors="coerce")
+    return df
 
 df_inventory = load_inventory()
 df = load_data()
@@ -368,6 +375,7 @@ for _, row in quotations.iterrows():
                 ):
                     confirm_dialog(row)
                     
+
 
 
 
