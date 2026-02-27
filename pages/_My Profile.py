@@ -319,16 +319,16 @@ for _, row in quotations.iterrows():
                 confirm_dialog(row)
             
 st.divider()
-st.write(f"### ⚠️ Pending Payment")
+st.write(f"### ⚠️ Invoice List - Pending Payment")
 st.write(f"This List Shows Orders With Pending Payment Only")
-if invoices.empty:
+if pending_payment.empty:
     st.info("No orders.")
 
 
 
 
 
-for _, row in invoices.iterrows():
+for _, row in pending_payment.iterrows():
     
     with st.expander(
         f"{row['item_1']} {row['bil_jam']} | {row['nama_tempat']} | {row['delivery_date']}"
@@ -341,6 +341,7 @@ for _, row in invoices.iterrows():
         st.markdown(f'<a href="{row["wa_link"]}" target="_blank">📲 WhatsApp</a>',unsafe_allow_html=True)
 
     
+
 
 
 
