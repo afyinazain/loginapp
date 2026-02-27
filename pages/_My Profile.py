@@ -305,6 +305,17 @@ def confirm_dialog(row):
 # ----------------------------
 # CARD VIEW
 # ----------------------------
+
+for _, row in quotations.iterrows():
+
+    with st.expander(
+        f"{row['quotation_num']} | {row['item_1']} | RM {float(row['total']):.2f}"
+    ):
+        st.write(f"Branch: {row['branch']}")
+        st.write(f"Delivery: {row['delivery_date']}")
+        if st.button("Confirm", key=row["quotation_num"]):
+            confirm_dialog(row)
+            
 for _, row in quotations.iterrows():
 
     expired = (
@@ -331,6 +342,7 @@ for _, row in quotations.iterrows():
                 ):
                     confirm_dialog(row)
                     
+
 
 
 
