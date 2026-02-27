@@ -87,8 +87,84 @@ for _, row in invoices.iterrows():
         with col2:
             st.link_button("WhatsApp", row["wa_link"])
         
-                
-               
+
+url_i = "https://docs.google.com/spreadsheets/d/1qw_0cW4ipW5eYh1_sqUyvZdIcjmYXLcsS4J6Y4NoU6A/export?format=csv&gid=2133205329"
+    df_inventory = pd.read_csv(url_i)
+
+    df_inventory.columns = df_inventory.columns.str.strip().str.lower()
+
+    # safe boolean conversion
+    df_inventory["active"] = (
+        df_inventory["active"]
+        .astype(str)
+        .str.strip()
+        .str.lower()
+        .isin(["true", "1", "yes"])
+    )
+
+    df_inventory = df_inventory[df_inventory["active"]]
+
+    # clean fields
+    df_inventory["branch"] = df_inventory["branch"].astype(str).str.strip()
+    df_inventory["product_name"] = df_inventory["product_name"].astype(str).str.strip().str.upper()
+
+    return df_inventory
+
+df_inventory = load_inventory()
+df = load_data()
+df = df[df["TYPE"] == "INV-R"]
+
+active_branch_list = (
+    df_inventory["branch"]
+    .dropna()
+    .unique()
+    .tolist()
+)
+
+active_branch_list.sort()
+
+all_inventory = df_inventory["product_name"].unique().tolist()
+
+# Parsing logic
+def extract_products(text,inventory_list):
+    if not isinstance(text, str):
+        return set()
+
+    text = text.upper()
+
+    found = set()
+    return {p for p in inventory_list if p in text}
+
+booked_items_all = set()
+
+for text in daily_df['item_1'].fillna(''):
+    booked_items_all.update(extract_products(text, all_inventory))
+
+def get_available_all():
+    return [i for i in all_inventory if i not in booked_items_all]
+
+def get_available_by_branch(branch):
+    branch_inventory = df_inventory[
+        df_inventory["branch"] == branch
+    ]["product_name"].tolist()
+
+    daily_branch_df = daily_df[
+        daily_df["branch"] == branch
+    ]
+
+    booked = set()
+    for text in daily_branch_df["item_1"].fillna(""):
+        booked.update(
+            extract_products(text, branch_inventory)
+        )
+
+    return [i for i in branch_inventory if i not in booked]
+
+
+available_items_all = [i for i in all_inventory if i not in booked_items_all]
+unavailable_items_all = [i for i in all_inventory if i in booked_items_all]
+
+----
             
     #----------------
 st.divider()
@@ -140,13 +216,36 @@ def confirm_dialog(row):
     no_tin = st.text_input("Alamat / No TIN / No IC / Email", value=row.get("no_tin", ""))
     nama_tempat = st.text_input("Nama Tempat (Cth: KL, Hulu Langat, KB, dll)", value=row.get("nama_tempat",""))
     link_location = st.text_input("Location URL (Maps/Waze)",value=row.get("link_location", ""))
-    bil_jam = st.text_input("Durasi",value=row.get("bil_jam",""))
-    item_1 = st.text_input("Item 1", value=row.get("item_1", ""))
+    branch = st.selectbox("Branch", active_branch_list)
+
+    branch_inventory = df_inventory[df_inventory["branch"] == branch]["product_name"].tolist()
+    daily_branch_df = daily_df[daily_df["branch"] == branch]
+
+    booked_branch_items = set()
+    for text in daily_branch_df['item_1'].fillna(''):
+        booked_branch_items.update(extract_products(text, branch_inventory))
+
+    available_branch_items = [
+        i for i in branch_inventory if i not in booked_branch_items
+    ]
+
+    available_branch_items1 = get_available_by_branch(branch)
+
+    item_1 = st.multiselect(
+    "Item 1",
+    available_branch_items1,
+    placeholder="Choose available item"
+    )
+
+
+    
+    
     harga_1 = st.number_input("Harga 1", value=float(row.get("harga_1", 0)))
     item_2 = st.text_input("Item 2", value=row.get("item_2", ""))
     harga_2 = st.number_input("Harga 2", value=float(row.get("harga_2", 0)))
     item_3 = st.text_input("Item 3", value=row.get("item_3", ""))
     harga_3 = st.number_input("Harga 3", value=float(row.get("harga_3", 0)))
+    bil_jam = st.text_input("Durasi",value=row.get("bil_jam",""))
     subtotal = harga_1+harga_2+harga_3
     st.write(f"Subtotal: RM{subtotal:.2f}")
     
@@ -267,6 +366,7 @@ for _, row in quotations.iterrows():
                 ):
                     confirm_dialog(row)
                     
+
 
 
 
