@@ -68,36 +68,44 @@ branch_colors = {
 
 events = []
 
+events = []
+
 for _, row in df_branch.iterrows():
-    if pd.notna(row["delivery_date"]):
-        item = str(row.get("item_1", "") or "")
-        bil_jam = str(row.get("bil_jam", "") or "")
-        quotation = str(row.get("invoice_num", "") or "")
-        salesperson = str(row.get("salesperson", "") or "")
-        
+    # Skip rows without a delivery_date
+    if pd.isna(row["delivery_date"]):
+        continue
 
-        total = row.get("total", 0)
-        if pd.isna(total):
-            total = 0.0
+    # Safely get all fields, replacing NaN with empty string or 0
+    item = str(row.get("item_1") if pd.notna(row.get("item_1")) else "")
+    bil_jam = str(row.get("bil_jam") if pd.notna(row.get("bil_jam")) else "")
+    quotation = str(row.get("invoice_num") if pd.notna(row.get("invoice_num")) else "")
+    salesperson = str(row.get("salesperson") if pd.notna(row.get("salesperson")) else "")
+    branch = str(row.get("branch") if pd.notna(row.get("branch")) else "Unknown")
 
-        branch = row.get("branch", "")
-        color = branch_colors.get(branch, "#18c936")
+    # Ensure total is a valid number
+    total = row.get("total", 0)
+    if pd.isna(total):
+        total = 0.0
+    total = float(total)
 
-        event = {
-            "title": f"{item} - {bil_jam}",
-            "start": row["delivery_date"].strftime("%Y-%m-%d"),
-            "end": row["delivery_date"].strftime("%Y-%m-%d"),
-            "color": color,
-            "extendedProps": {
-                "quotation": quotation,
-                "salesperson": salesperson,
-                "total": float(total),
-                "branch": branch
-            }
+    # Assign color per branch
+    color = branch_colors.get(branch, "#18c936")
+
+    # Append the event
+    event = {
+        "title": f"{item} - {bil_jam}" if item or bil_jam else branch,
+        "start": row["delivery_date"].strftime("%Y-%m-%d"),
+        "end": row["delivery_date"].strftime("%Y-%m-%d"),
+        "color": color,
+        "extendedProps": {
+            "quotation": quotation,
+            "salesperson": salesperson,
+            "total": total,
+            "branch": branch
         }
+    }
 
-        events.append(event)
-
+    events.append(event)
 
 st.markdown("""
 <style>
@@ -234,4 +242,5 @@ for i, day in enumerate(flat_dates):
 
 
 #----------------
+
 
