@@ -88,8 +88,47 @@ for _, row in invoices.iterrows():
             st.link_button("WhatsApp", row["wa_link"])
         
 st.divider()
+
+
+
+
+# ----------------------------
+# LOAD INVENTORY (Branch + Items)
+# ----------------------------
+
+INVENTORY_SHEET_ID = "1qw_0cW4ipW5eYh1_sqUyvZdIcjmYXLcsS4J6Y4NoU6A"
+INVENTORY_SHEET_NAME = "Stock List"  # change if different
+
+inventory_data = read_sheet(
+    sheet_id=INVENTORY_SHEET_ID,
+    sheet_name=INVENTORY_SHEET_NAME,
+    header_row=1
+)
+
+df_inventory = pd.DataFrame(inventory_data)
+
+# Clean columns
+df_inventory.columns = df_inventory.columns.str.strip().str.lower()
+
+# Make sure column names match your sheet
+# Required columns: branch , product_name , active
+
+df_inventory["branch"] = df_inventory["branch"].astype(str).str.strip()
+df_inventory["product_name"] = df_inventory["product_name"].astype(str).str.strip()
+
+# Optional: only active items
+if "active" in df_inventory.columns:
+    df_inventory = df_inventory[
+        df_inventory["active"].astype(str).str.lower().isin(["true","1","yes"])
+    ]
+
+# Get branch list
+active_branch_list = sorted(df_inventory["branch"].unique().tolist())
+
 st.write(f"### ⌛️ My Active Quotation List")
 df["expiry_date"] = pd.to_datetime(df["expiry_date"], errors="coerce")
+
+#----
 
 quotations = df[
     (df["salesperson"] == user_name) &
@@ -99,6 +138,7 @@ quotations = df[
 if quotations.empty:
     st.info("No active quotations.")
     st.stop()
+
 
 # ----------------------------
 # POPUP DIALOG
@@ -136,10 +176,34 @@ def confirm_dialog(row):
     no_tin = st.text_input("Alamat / No TIN / No IC / Email", value=row.get("no_tin", ""))
     nama_tempat = st.text_input("Nama Tempat (Cth: KL, Hulu Langat, KB, dll)", value=row.get("nama_tempat",""))
     link_location = st.text_input("Location URL (Maps/Waze)",value=row.get("link_location", ""))
-    branch = st.selectbox("Branch", active_branch_list)
+    # ----------------------------
+    # Branch Selection
+    # ----------------------------
+
+    default_branch = row.get("branch", "")
+
+    branch = st.selectbox(
+        "Branch",
+        active_branch_list,
+        index=active_branch_list.index(default_branch)
+        if default_branch in active_branch_list else 0
+    )
 
     
-    item_1 = 0
+    # ----------------------------
+    # Dynamic Item 1 Based On Branch
+    # ----------------------------
+
+    branch_items = df_inventory[df_inventory["branch"] == branch]["product_name"].tolist()
+
+    default_item = row.get("item_1", "")
+
+    item_1 = st.selectbox(
+        "Item 1",
+        branch_items,
+        index=branch_items.index(default_item)
+        if default_item in branch_items else 0
+    )
     
     harga_1 = st.number_input("Harga 1", value=float(row.get("harga_1", 0)))
     item_2 = st.text_input("Item 2", value=row.get("item_2", ""))
@@ -267,6 +331,7 @@ for _, row in quotations.iterrows():
                 ):
                     confirm_dialog(row)
                     
+
 
 
 
