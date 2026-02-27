@@ -317,7 +317,7 @@ for _, row in quotations.iterrows():
     ):
         st.write(f"Branch: {row['branch']}")
         st.write(f"Total: RM {float(row['total']):.2f}")
-        st.link_button("WhatsApp", row["wa_link"])
+        st.markdown(f'<a href="{row["wa_link"]}" target="_blank">📲 WhatsApp</a>',unsafe_allow_html=True)
 
         if expired:
             st.error("❌ Expired")
@@ -329,14 +329,9 @@ for _, row in quotations.iterrows():
             ):
                 confirm_dialog(row)
             
-for _, row in quotations.iterrows():
-
-    expired = (
-        pd.notna(row["expiry_date"]) and
-        datetime.today() > row["expiry_date"]
-    )
 
                     
+
 
 
 
