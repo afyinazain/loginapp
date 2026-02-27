@@ -336,25 +336,8 @@ for _, row in quotations.iterrows():
         datetime.today() > row["expiry_date"]
     )
 
-    with st.container(border=True):
-        col1, col2 = st.columns([4, 1])
-
-        with col1:
-            st.markdown(f"### 🧾 {row['item_1']} - {row['branch']} ({row['delivery_date']})")
-            st.write(f"**Total:** RM {float(row['total']):.2f}")
-            
-            if expired:
-                st.error("❌ Expired")
-
-        with col2:
-            st.link_button("WhatsApp", row["wa_link"])
-            if not expired:
-                if st.button(
-                    "Confirm",
-                    key=f"confirm_btn_{row['quotation_num']}"
-                ):
-                    confirm_dialog(row)
                     
+
 
 
 
