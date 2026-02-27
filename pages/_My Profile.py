@@ -323,11 +323,14 @@ for _, row in invoices.iterrows():
         f"{row['item_1']} {row['bil_jam']} | {row['nama_tempat']} | {row['delivery_date']}"
     ):
         st.write(f"Branch: {row['branch']}")
+        st.write(f"Invoice: {row['invoice_num']}")
         st.write(f"Total: RM {float(row['total']):.2f}")
+        
         st.markdown(f"<span style='color:red;'>Balance To Be Paid: RM {float(row['lookup_pivot3']):.2f}</span>",unsafe_allow_html=True)
         st.markdown(f'<a href="{row["wa_link"]}" target="_blank">📲 WhatsApp</a>',unsafe_allow_html=True)
 
     
+
 
 
 
