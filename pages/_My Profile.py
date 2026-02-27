@@ -123,6 +123,10 @@ df_inventory = load_inventory()
 df = load_data()
 df = df[df["TYPE"] == "INV-R"]
 
+selected_date = st.date_input(
+        "Delivery Date",
+        value=pd.to_datetime(row.get("delivery_date", datetime.today())).date()
+        )
 
 #convert it
 if selected_date:
@@ -383,6 +387,7 @@ for _, row in quotations.iterrows():
                 ):
                     confirm_dialog(row)
                     
+
 
 
 
