@@ -189,7 +189,7 @@ if calendar_event and "eventClick" in calendar_event:
 import calendar as cal
 from datetime import date
 
-st.subheader(f"📆 Schedule for {selected_branch}")
+st.subheader(f"📆 Schedule Grid for {selected_branch}")
 
 today = datetime.today()
 year = today.year
@@ -220,17 +220,23 @@ for i, day in enumerate(flat_dates):
 
         if current_date in events_by_date:
             for event in events_by_date[current_date]:
-                item = str(event.get("item_1", ""))
-                bil_jam = str(event.get("bil_jam", ""))
+                # Safely get fields
+                item = str(event.get("item_1") if pd.notna(event.get("item_1")) else "")
+                bil_jam = str(event.get("bil_jam") if pd.notna(event.get("bil_jam")) else "")
+                branch = str(event.get("branch") if pd.notna(event.get("branch")) else "Unknown")
+
+                # Get color per branch
+                color = branch_colors.get(branch, "#18c936")
 
                 st.markdown(
                     f"""
                     <div style="
-                        background:#18c936;
+                        background:{color};
                         padding:6px;
                         border-radius:6px;
                         font-size:12px;
-                        margin-bottom:4px;">
+                        margin-bottom:4px;
+                        color:white;">
                         {item} - {bil_jam}
                     </div>
                     """,
@@ -238,9 +244,3 @@ for i, day in enumerate(flat_dates):
                 )
         else:
             st.write("—")
-
-
-
-#----------------
-
-
