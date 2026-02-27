@@ -319,15 +319,15 @@ for _, row in quotations.iterrows():
         st.write(f"Total: RM {float(row['total']):.2f}")
         st.link_button("WhatsApp", row["wa_link"])
 
-            if expired:
-                st.error("❌ Expired")
+        if expired:
+            st.error("❌ Expired")
                 
-            if not expired:
-                if st.button(
-                    "Confirm",
-                    key=f"confirm_btn_{row['quotation_num']}"
-                ):
-                    confirm_dialog(row)
+        if not expired:
+            if st.button(
+                "Confirm",
+                key=f"confirm_btn_{row['quotation_num']}"
+            ):
+                confirm_dialog(row)
             
 for _, row in quotations.iterrows():
 
@@ -355,6 +355,7 @@ for _, row in quotations.iterrows():
                 ):
                     confirm_dialog(row)
                     
+
 
 
 
