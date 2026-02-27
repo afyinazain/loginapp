@@ -333,7 +333,7 @@ df_inv["delivery_date_str"] = df_inv["delivery_date"].dt.strftime("%d-%b-%Y")
 for _, row in pending_payment.iterrows():
     
     with st.expander(f"Pending Payment: RM {float(row['lookup_pivot3']):.2f}"):
-        st.write(f"{row['item_1']} {row['bil_jam']} | {row['nama_tempat']} | {row['delivery_date_str']}")
+        st.write(f"{row['item_1']} {row['bil_jam']} | {row['nama_tempat']} | {row['delivery_date'].strftime("%d-%b-%Y")}")
         st.write(f"Branch: {row['branch']}")
         st.write(f"Invoice: {row['invoice_num']}")
         st.write(f"Total: RM {float(row['total']):.2f}")
@@ -346,7 +346,7 @@ st.write(f"This List Shows Pending Orders To Be Delivered")
 
 for _, row in invoices.iterrows():
     
-    with st.expander(f"{row['item_1']} {row['bil_jam']} | {row['nama_tempat']} | {row['delivery_date_str']}"):
+    with st.expander(f"{row['item_1']} {row['bil_jam']} | {row['nama_tempat']} | {row['delivery_date'].strftime("%d-%b-%Y")}"):
         st.write(f"Branch: {row['branch']}")
         st.write(f"Invoice: {row['invoice_num']}")
         st.write(f"Total: RM {float(row['total']):.2f}")
