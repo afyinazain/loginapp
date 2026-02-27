@@ -68,11 +68,16 @@ invoices = df_inv[
     (df_inv["lookup_pivot3"] > 0)
 ]
 
+df_inv["delivery_date"] = pd.to_datetime(
+    df_inv["delivery_date"],
+    errors="coerce"
+)
+
 pending_payment = df_inv[
     (df_inv["salesperson"] == user_name) &
     (df_inv["type_status"] == "Invoice") &
     (df_inv["lookup_pivot3"] > 0) &
-    (df_inv["delivery_date"] > datetime.today())
+    (df_inv["delivery_date"] > pd.Timestamp.today())
 ]
 
 
@@ -336,6 +341,7 @@ for _, row in invoices.iterrows():
         st.markdown(f'<a href="{row["wa_link"]}" target="_blank">📲 WhatsApp</a>',unsafe_allow_html=True)
 
     
+
 
 
 
