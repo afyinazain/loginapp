@@ -71,12 +71,11 @@ events = []
 for _, row in df_branch.iterrows():
     
     branch = row["branch"]
-            color = branch_colors.get(branch, "#18c936")
-            event = {
-                "title": f"{item} - {bil_jam}",
-                "start": row["delivery_date"].strftime("%Y-%m-%d"),
-                "end": row["delivery_date"].strftime("%Y-%m-%d"),
-                "color": color,
+    color = branch_colors.get(branch, "#18c936")
+    event = {"title": f"{item} - {bil_jam}",
+            "start": row["delivery_date"].strftime("%Y-%m-%d"),
+            "end": row["delivery_date"].strftime("%Y-%m-%d"),
+            "color": color,
                 
     if pd.notna(row["delivery_date"]):
 
@@ -239,4 +238,5 @@ for i, day in enumerate(flat_dates):
                 )
         else:
             st.write("—")
+
 
