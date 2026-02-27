@@ -340,7 +340,7 @@ for _, row in pending_payment.iterrows():
         st.markdown(f'<a href="{row["wa_link"]}" target="_blank">📲 WhatsApp</a>',unsafe_allow_html=True)
 
 st.divider()
-st.write(f"### ⚠️ Invoice List - To Be Delivered")
+st.write(f"### 🕒 Invoice List - To Be Delivered")
 st.write(f"This List Shows Pending Orders To Be Delivered")
 
 for _, row in invoices.iterrows():
@@ -352,6 +352,7 @@ for _, row in invoices.iterrows():
         st.markdown(f"<span style='color:red;'>Balance To Be Paid: RM {float(row['lookup_pivot3']):.2f}</span>",unsafe_allow_html=True)
         st.markdown(f'<a href="{row["wa_link"]}" target="_blank">📲 WhatsApp</a>',unsafe_allow_html=True)
     
+
 
 
 
