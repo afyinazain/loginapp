@@ -61,23 +61,24 @@ df_inv["lookup_pivot3"] = pd.to_numeric(
     errors="coerce"
 )
 
-
-invoices = df_inv[
-    (df_inv["salesperson"] == user_name) &
-    (df_inv["type_status"] == "Invoice") &
-    (df_inv["lookup_pivot3"] > 0)
-]
-
 df_inv["delivery_date"] = pd.to_datetime(
     df_inv["delivery_date"],
     errors="coerce"
 )
 
+invoices = df_inv[
+    (df_inv["salesperson"] == user_name) &
+    (df_inv["type_status"] == "Invoice") &
+    (df_inv["lookup_pivot3"] > 0) &
+    (df_inv["delivery_date"] < pd.Timestamp.today())
+]
+
+
 pending_payment = df_inv[
     (df_inv["salesperson"] == user_name) &
     (df_inv["type_status"] == "Invoice") &
     (df_inv["lookup_pivot3"] > 0) &
-    (df_inv["delivery_date"] > pd.Timestamp.today())
+    (df_inv["delivery_date"] >= pd.Timestamp.today())
 ]
 
 
@@ -330,7 +331,7 @@ if pending_payment.empty:
 
 for _, row in pending_payment.iterrows():
     
-    with st.expander(f"Balance To Be Paid: RM {float(row['lookup_pivot3']):.2f}"):
+    with st.expander(f"Pending Payment: RM {float(row['lookup_pivot3']):.2f}"):
         st.write(f"{row['item_1']} {row['bil_jam']} | {row['nama_tempat']} | {row['delivery_date']}")
         st.write(f"Branch: {row['branch']}")
         st.write(f"Invoice: {row['invoice_num']}")
@@ -338,7 +339,20 @@ for _, row in pending_payment.iterrows():
         st.markdown(f"<span style='color:red;'>Balance To Be Paid: RM {float(row['lookup_pivot3']):.2f}</span>",unsafe_allow_html=True)
         st.markdown(f'<a href="{row["wa_link"]}" target="_blank">📲 WhatsApp</a>',unsafe_allow_html=True)
 
+st.divider()
+st.write(f"### ⚠️ Invoice List - To Be Delivered")
+st.write(f"This List Shows Pending Orders To Be Delivered")
+
+for _, row in invoices.iterrows():
     
+    with st.expander(f"{row['item_1']} {row['bil_jam']} | {row['nama_tempat']} | {row['delivery_date']}"):
+        st.write(f"Branch: {row['branch']}")
+        st.write(f"Invoice: {row['invoice_num']}")
+        st.write(f"Total: RM {float(row['total']):.2f}")
+        st.markdown(f"<span style='color:red;'>Balance To Be Paid: RM {float(row['lookup_pivot3']):.2f}</span>",unsafe_allow_html=True)
+        st.markdown(f'<a href="{row["wa_link"]}" target="_blank">📲 WhatsApp</a>',unsafe_allow_html=True)
+    
+
 
 
 
