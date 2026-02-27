@@ -89,18 +89,17 @@ for _, row in invoices.iterrows():
         
 
 url_i = "https://docs.google.com/spreadsheets/d/1qw_0cW4ipW5eYh1_sqUyvZdIcjmYXLcsS4J6Y4NoU6A/export?format=csv&gid=2133205329"
-    df_inventory = pd.read_csv(url_i)
+df_inventory = pd.read_csv(url_i)
 
-    df_inventory.columns = df_inventory.columns.str.strip().str.lower()
+df_inventory.columns = df_inventory.columns.str.strip().str.lower()
 
     # safe boolean conversion
-    df_inventory["active"] = (
-        df_inventory["active"]
-        .astype(str)
-        .str.strip()
-        .str.lower()
-        .isin(["true", "1", "yes"])
-    )
+df_inventory["active"] = (
+    df_inventory["active"]
+    .astype(str)
+    .str.strip()
+    .str.lower()
+    .isin(["true", "1", "yes"]))
 
     df_inventory = df_inventory[df_inventory["active"]]
 
@@ -366,6 +365,7 @@ for _, row in quotations.iterrows():
                 ):
                     confirm_dialog(row)
                     
+
 
 
 
