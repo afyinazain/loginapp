@@ -69,26 +69,6 @@ invoices = df_inv[
     (df_inv["lookup_pivot3"] > 0)
 ]
 
-if invoices.empty:
-    st.info("No orders.")
-
-
-
-
-
-for _, row in invoices.iterrows():
-    
-    with st.expander(
-        f"{row['item_1']} {row['bil_jam']} | {row['nama_tempat']} | {row['delivery_date']}"
-    ):
-        st.write(f"Branch: {row['branch']}")
-        st.write(f"Total: RM {float(row['total']):.2f}")
-        st.markdown(f'<a href="{row["wa_link"]}" target="_blank">📲 WhatsApp</a>',unsafe_allow_html=True)
-
-    
-st.divider()
-
-
 
 
 # ----------------------------
@@ -328,33 +308,25 @@ for _, row in quotations.iterrows():
             ):
                 confirm_dialog(row)
             
+st.divider()
 
-                    
-
-
-
-
+if invoices.empty:
+    st.info("No orders.")
 
 
 
 
 
+for _, row in invoices.iterrows():
+    
+    with st.expander(
+        f"{row['item_1']} {row['bil_jam']} | {row['nama_tempat']} | {row['delivery_date']}"
+    ):
+        st.write(f"Branch: {row['branch']}")
+        st.write(f"Total: RM {float(row['total']):.2f}")
+        st.markdown(f'<a href="{row["wa_link"]}" target="_blank">📲 WhatsApp</a>',unsafe_allow_html=True)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    
 
 
 
