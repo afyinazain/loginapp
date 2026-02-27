@@ -35,10 +35,11 @@ df = load_schedule_data()
 # ---------------------------------
 # BRANCH FILTER
 # ---------------------------------
-branch_list = sorted(df["branch"].dropna().unique().tolist())
 
-default_branch = branch_list.index(st.session_state.user["branch"]) \
-    if st.session_state.user.get("branch") in branch_list else 0
+branch_list = ["All Branches"] + sorted(df["branch"].dropna().unique().tolist())
+
+default_branch = 0  # Default to all branches
+
 
 selected_branch = st.radio(
     "🏢 Select Branch",
@@ -47,17 +48,36 @@ selected_branch = st.radio(
     horizontal=True
 )
 
-
-# Filter by branch
-df_branch = df[df["branch"] == selected_branch]
+if selected_branch == "All Branches":
+    df_branch = df.copy()
+else:
+    df_branch = df[df["branch"] == selected_branch]
+    
 
 # ---------------------------------
 # PREPARE EVENTS FOR CALENDAR
 # ---------------------------------
+
+branch_colors = {
+    branch: color for branch, color in zip(
+        df["branch"].unique(),
+        ["#18c936", "#f39c12", "#3498db", "#9b59b6", "#e74c3c"]
+    )
+}
+
+
 events = []
 
 for _, row in df_branch.iterrows():
-
+    
+    branch = row["branch"]
+            color = branch_colors.get(branch, "#18c936")
+            event = {
+                "title": f"{item} - {bil_jam}",
+                "start": row["delivery_date"].strftime("%Y-%m-%d"),
+                "end": row["delivery_date"].strftime("%Y-%m-%d"),
+                "color": color,
+                
     if pd.notna(row["delivery_date"]):
 
         item = str(row.get("item_1", "") or "")
@@ -82,6 +102,11 @@ for _, row in df_branch.iterrows():
         }
 
         events.append(event)
+
+        
+        
+            }
+    
 
 st.markdown("""
 <style>
@@ -214,3 +239,4 @@ for i, day in enumerate(flat_dates):
                 )
         else:
             st.write("—")
+
