@@ -70,7 +70,7 @@ invoices = df_inv[
     (df_inv["salesperson"] == user_name) &
     (df_inv["type_status"] == "Invoice") &
     (df_inv["lookup_pivot3"] > 0) &
-    (df_inv["delivery_date"] < pd.Timestamp.today())
+    (df_inv["delivery_date"] > pd.Timestamp.today())
 ]
 
 
@@ -78,7 +78,7 @@ pending_payment = df_inv[
     (df_inv["salesperson"] == user_name) &
     (df_inv["type_status"] == "Invoice") &
     (df_inv["lookup_pivot3"] > 0) &
-    (df_inv["delivery_date"] >= pd.Timestamp.today())
+    (df_inv["delivery_date"] <= pd.Timestamp.today())
 ]
 
 
@@ -352,6 +352,7 @@ for _, row in invoices.iterrows():
         st.markdown(f"<span style='color:red;'>Balance To Be Paid: RM {float(row['lookup_pivot3']):.2f}</span>",unsafe_allow_html=True)
         st.markdown(f'<a href="{row["wa_link"]}" target="_blank">📲 WhatsApp</a>',unsafe_allow_html=True)
     
+
 
 
 
