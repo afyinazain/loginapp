@@ -65,10 +65,27 @@ branch_colors = {
     )
 }
 
+# -----------------------
+# BRANCH COLOR GUIDE
+# -----------------------
+st.markdown("### 🏢 Branch Color Guide")
+legend_html = "<div style='display:flex; flex-wrap:wrap; gap:10px;'>"
+
+for branch, color in branch_colors.items():
+    legend_html += f"""
+    <div style='display:flex; align-items:center; gap:4px;'>
+        <div style='width:20px; height:20px; background:{color}; border-radius:4px;'></div>
+        <span>{branch}</span>
+    </div>
+    """
+
+legend_html += "</div>"
+
+st.markdown(legend_html, unsafe_allow_html=True)
 
 events = []
 
-events = []
+
 
 for _, row in df_branch.iterrows():
     # Skip rows without a delivery_date
@@ -245,4 +262,5 @@ for i, day in enumerate(flat_dates):
                 )
         else:
             st.write("—")
+
 
