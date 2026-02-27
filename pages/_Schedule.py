@@ -74,9 +74,11 @@ for _, row in df_branch.iterrows():
         bil_jam = str(row.get("bil_jam", "") or "")
         quotation = str(row.get("invoice_num", "") or "")
         salesperson = str(row.get("salesperson", "") or "")
+        
+
         total = row.get("total", 0)
         if pd.isna(total):
-            total = 0
+            total = 0.0
 
         branch = row.get("branch", "")
         color = branch_colors.get(branch, "#18c936")
@@ -232,3 +234,4 @@ for i, day in enumerate(flat_dates):
 
 
 #----------------
+
