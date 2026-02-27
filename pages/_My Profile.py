@@ -123,6 +123,15 @@ df_inventory = load_inventory()
 df = load_data()
 df = df[df["TYPE"] == "INV-R"]
 
+
+#convert it
+if selected_date:
+    #filter data for that date
+    daily_df = df[df["delivery_date"].dt.date == selected_date]
+else:
+    daily_df = pd.DataFrame()
+
+
 active_branch_list = (
     df_inventory["branch"]
     .dropna()
@@ -375,6 +384,7 @@ for _, row in quotations.iterrows():
                 ):
                     confirm_dialog(row)
                     
+
 
 
 
