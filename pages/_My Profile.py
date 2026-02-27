@@ -87,104 +87,6 @@ for _, row in invoices.iterrows():
         with col2:
             st.link_button("WhatsApp", row["wa_link"])
         
-
-@st.cache_data(ttl=60)
-def load_inventory():
-    url_i = "https://docs.google.com/spreadsheets/d/1qw_0cW4ipW5eYh1_sqUyvZdIcjmYXLcsS4J6Y4NoU6A/export?format=csv&gid=2133205329"
-    df_inventory = pd.read_csv(url_i)
-
-    df_inventory.columns = df_inventory.columns.str.strip().str.lower()
-
-    # safe boolean conversion
-    df_inventory["active"] = (
-        df_inventory["active"]
-        .astype(str)
-        .str.strip()
-        .str.lower()
-        .isin(["true", "1", "yes"])
-    )
-
-    df_inventory = df_inventory[df_inventory["active"]]
-
-    # clean fields
-    df_inventory["branch"] = df_inventory["branch"].astype(str).str.strip()
-    df_inventory["product_name"] = df_inventory["product_name"].astype(str).str.strip().str.upper()
-
-    return df_inventory
-    
-@st.cache_data(ttl=30)
-def load_data():
-    url = "https://docs.google.com/spreadsheets/d/1qw_0cW4ipW5eYh1_sqUyvZdIcjmYXLcsS4J6Y4NoU6A/export?format=csv&gid=1912796754"
-    df = pd.read_csv(url, header=6)
-    df["delivery_date"] = pd.to_datetime(df["delivery_date"], errors="coerce")
-    return df
-
-df_inventory = load_inventory()
-df = load_data()
-df = df[df["TYPE"] == "INV-R"]
-
-selected_date = pd.to_datetime(row.get("delivery_date", datetime.today())).date()
-
-#convert it
-if selected_date:
-    #filter data for that date
-    daily_df = df[df["delivery_date"].dt.date == selected_date]
-else:
-    daily_df = pd.DataFrame()
-
-
-active_branch_list = (
-    df_inventory["branch"]
-    .dropna()
-    .unique()
-    .tolist()
-)
-
-active_branch_list.sort()
-
-all_inventory = df_inventory["product_name"].unique().tolist()
-
-# Parsing logic
-def extract_products(text,inventory_list):
-    if not isinstance(text, str):
-        return set()
-
-    text = text.upper()
-
-    found = set()
-    return {p for p in inventory_list if p in text}
-
-booked_items_all = set()
-
-for text in daily_df['item_1'].fillna(''):
-    booked_items_all.update(extract_products(text, all_inventory))
-
-def get_available_all():
-    return [i for i in all_inventory if i not in booked_items_all]
-
-def get_available_by_branch(branch):
-    branch_inventory = df_inventory[
-        df_inventory["branch"] == branch
-    ]["product_name"].tolist()
-
-    daily_branch_df = daily_df[
-        daily_df["branch"] == branch
-    ]
-
-    booked = set()
-    for text in daily_branch_df["item_1"].fillna(""):
-        booked.update(
-            extract_products(text, branch_inventory)
-        )
-
-    return [i for i in branch_inventory if i not in booked]
-
-
-available_items_all = [i for i in all_inventory if i not in booked_items_all]
-unavailable_items_all = [i for i in all_inventory if i in booked_items_all]
-
-            
-    #----------------
 st.divider()
 st.write(f"### ⌛️ My Active Quotation List")
 df["expiry_date"] = pd.to_datetime(df["expiry_date"], errors="coerce")
@@ -236,27 +138,8 @@ def confirm_dialog(row):
     link_location = st.text_input("Location URL (Maps/Waze)",value=row.get("link_location", ""))
     branch = st.selectbox("Branch", active_branch_list)
 
-    branch_inventory = df_inventory[df_inventory["branch"] == branch]["product_name"].tolist()
-    daily_branch_df = daily_df[daily_df["branch"] == branch]
-
-    booked_branch_items = set()
-    for text in daily_branch_df['item_1'].fillna(''):
-        booked_branch_items.update(extract_products(text, branch_inventory))
-
-    available_branch_items = [
-        i for i in branch_inventory if i not in booked_branch_items
-    ]
-
-    available_branch_items1 = get_available_by_branch(branch)
-
-    item_1 = st.multiselect(
-    "Item 1",
-    available_branch_items1,
-    placeholder="Choose available item"
-    )
-
-
-    item_1_str = ", ".join(item_1)
+    
+    item_1 = 0
     
     harga_1 = st.number_input("Harga 1", value=float(row.get("harga_1", 0)))
     item_2 = st.text_input("Item 2", value=row.get("item_2", ""))
@@ -311,7 +194,7 @@ def confirm_dialog(row):
         ws1.update_cell(sheet_row1, df.columns.get_loc("link_location") + 1, link_location)
         ws1.update_cell(sheet_row1, df.columns.get_loc("doc_date") + 1, doc_date)
         ws1.update_cell(sheet_row1, df.columns.get_loc("delivery_date") + 1, delivery_date.strftime("%Y-%m-%d"))
-        ws1.update_cell(sheet_row1, df.columns.get_loc("item_1") + 1, item_1_str)
+        ws1.update_cell(sheet_row1, df.columns.get_loc("item_1") + 1, item_1)
         ws1.update_cell(sheet_row1, df.columns.get_loc("item_2") + 1, item_2)
         ws1.update_cell(sheet_row1, df.columns.get_loc("item_3") + 1, item_3)
         ws1.update_cell(sheet_row1, df.columns.get_loc("harga_1") + 1, harga_1)
@@ -340,7 +223,7 @@ def confirm_dialog(row):
         ws2.update_cell(sheet_row2, df2.columns.get_loc("link_location") + 1, link_location)
         ws2.update_cell(sheet_row2, df2.columns.get_loc("doc_date") + 1, doc_date)
         ws2.update_cell(sheet_row2, df2.columns.get_loc("delivery_date") + 1, delivery_date.strftime("%Y-%m-%d"))
-        ws2.update_cell(sheet_row2, df2.columns.get_loc("item_1") + 1, item_1_str)
+        ws2.update_cell(sheet_row2, df2.columns.get_loc("item_1") + 1, item_1)
         ws2.update_cell(sheet_row2, df2.columns.get_loc("item_2") + 1, item_2)
         ws2.update_cell(sheet_row2, df2.columns.get_loc("item_3") + 1, item_3)
         ws2.update_cell(sheet_row2, df2.columns.get_loc("harga_1") + 1, harga_1)
@@ -384,6 +267,7 @@ for _, row in quotations.iterrows():
                 ):
                     confirm_dialog(row)
                     
+
 
 
 
