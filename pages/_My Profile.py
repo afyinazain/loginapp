@@ -256,7 +256,7 @@ def confirm_dialog(row):
     )
 
 
-    
+    item_1_str = ", ".join(item_1)
     
     harga_1 = st.number_input("Harga 1", value=float(row.get("harga_1", 0)))
     item_2 = st.text_input("Item 2", value=row.get("item_2", ""))
@@ -311,7 +311,7 @@ def confirm_dialog(row):
         ws1.update_cell(sheet_row1, df.columns.get_loc("link_location") + 1, link_location)
         ws1.update_cell(sheet_row1, df.columns.get_loc("doc_date") + 1, doc_date)
         ws1.update_cell(sheet_row1, df.columns.get_loc("delivery_date") + 1, delivery_date.strftime("%Y-%m-%d"))
-        ws1.update_cell(sheet_row1, df.columns.get_loc("item_1") + 1, item_1)
+        ws1.update_cell(sheet_row1, df.columns.get_loc("item_1") + 1, item_1_str)
         ws1.update_cell(sheet_row1, df.columns.get_loc("item_2") + 1, item_2)
         ws1.update_cell(sheet_row1, df.columns.get_loc("item_3") + 1, item_3)
         ws1.update_cell(sheet_row1, df.columns.get_loc("harga_1") + 1, harga_1)
@@ -340,7 +340,7 @@ def confirm_dialog(row):
         ws2.update_cell(sheet_row2, df2.columns.get_loc("link_location") + 1, link_location)
         ws2.update_cell(sheet_row2, df2.columns.get_loc("doc_date") + 1, doc_date)
         ws2.update_cell(sheet_row2, df2.columns.get_loc("delivery_date") + 1, delivery_date.strftime("%Y-%m-%d"))
-        ws2.update_cell(sheet_row2, df2.columns.get_loc("item_1") + 1, item_1)
+        ws2.update_cell(sheet_row2, df2.columns.get_loc("item_1") + 1, item_1_str)
         ws2.update_cell(sheet_row2, df2.columns.get_loc("item_2") + 1, item_2)
         ws2.update_cell(sheet_row2, df2.columns.get_loc("item_3") + 1, item_3)
         ws2.update_cell(sheet_row2, df2.columns.get_loc("harga_1") + 1, harga_1)
@@ -384,6 +384,7 @@ for _, row in quotations.iterrows():
                 ):
                     confirm_dialog(row)
                     
+
 
 
 
