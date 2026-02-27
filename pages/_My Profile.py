@@ -330,7 +330,7 @@ if pending_payment.empty:
 
 for _, row in pending_payment.iterrows():
     
-    with st.expander(f"Balance To Be Paid: RM {float(row['lookup_pivot3']):.2f}):
+    with st.expander(f"Balance To Be Paid: RM {float(row['lookup_pivot3']):.2f}"):
         st.write(f"{row['item_1']} {row['bil_jam']} | {row['nama_tempat']} | {row['delivery_date']}")
         st.write(f"Branch: {row['branch']}")
         st.write(f"Invoice: {row['invoice_num']}")
@@ -339,6 +339,7 @@ for _, row in pending_payment.iterrows():
         st.markdown(f'<a href="{row["wa_link"]}" target="_blank">📲 WhatsApp</a>',unsafe_allow_html=True)
 
     
+
 
 
 
