@@ -321,7 +321,7 @@ for _, row in quotations.iterrows():
             
 st.divider()
 st.write(f"### ⚠️ Invoice List - Pending Payment")
-st.write(f"This List Shows Orders With Pending Payment Only")
+st.write(f"This List Shows Delivered Orders With Pending Payment")
 if pending_payment.empty:
     st.info("No orders.")
 
@@ -352,6 +352,7 @@ for _, row in invoices.iterrows():
         st.markdown(f"<span style='color:red;'>Balance To Be Paid: RM {float(row['lookup_pivot3']):.2f}</span>",unsafe_allow_html=True)
         st.markdown(f'<a href="{row["wa_link"]}" target="_blank">📲 WhatsApp</a>',unsafe_allow_html=True)
     
+
 
 
 
