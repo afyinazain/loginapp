@@ -204,7 +204,7 @@ def confirm_dialog(row):
         index=branch_items.index(default_item)
         if default_item in branch_items else 0
     )
-    
+    st.info(f"Semua pilihan kolamyang aktif di {branch}")
     harga_1 = st.number_input("Harga 1", value=float(row.get("harga_1", 0)))
     item_2 = st.text_input("Item 2", value=row.get("item_2", ""))
     harga_2 = st.number_input("Harga 2", value=float(row.get("harga_2", 0)))
@@ -331,6 +331,7 @@ for _, row in quotations.iterrows():
                 ):
                     confirm_dialog(row)
                     
+
 
 
 
