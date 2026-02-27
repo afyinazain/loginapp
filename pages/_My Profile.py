@@ -182,7 +182,6 @@ def get_available_by_branch(branch):
 available_items_all = [i for i in all_inventory if i not in booked_items_all]
 unavailable_items_all = [i for i in all_inventory if i in booked_items_all]
 
-----
             
     #----------------
 st.divider()
@@ -384,6 +383,7 @@ for _, row in quotations.iterrows():
                 ):
                     confirm_dialog(row)
                     
+
 
 
 
