@@ -161,23 +161,27 @@ calendar_options = {
     }
 }
 # -----------------------
-# BRANCH COLOR GUIDE
+# BRANCH COLOR GUIDE (fixed)
 # -----------------------
 st.markdown("### 🏢 Branch Color Guide")
-legend_html = "<div style='display:flex; flex-wrap:wrap; gap:10px;'>"
 
-for branch, color in branch_colors.items():
+# Include all branches from df_branch (after filtering)
+display_branches = df_branch["branch"].dropna().unique().tolist()
+
+legend_html = "<div style='display:flex; flex-wrap:wrap; gap:10px; margin-bottom:12px;'>"
+
+for branch in display_branches:
+    color = branch_colors.get(branch, "#18c936")
     legend_html += f"""
-    <div style='display:flex; align-items:center; gap:4px;'>
-        <div style='width:20px; height:20px; background:{color}; border-radius:4px;'></div>
-        <span>{branch}</span>
+    <div style='display:flex; align-items:center; gap:6px;'>
+        <div style='width:20px; height:20px; background:{color}; border-radius:4px; border:1px solid #000;'></div>
+        <span style='font-size:12px;'>{branch}</span>
     </div>
     """
 
 legend_html += "</div>"
 
 st.markdown(legend_html, unsafe_allow_html=True)
-
 
 # ---------------------------------
 # DISPLAY CALENDAR
@@ -261,6 +265,7 @@ for i, day in enumerate(flat_dates):
                 )
         else:
             st.write("—")
+
 
 
 
