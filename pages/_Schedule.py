@@ -222,6 +222,7 @@ for i, day in enumerate(flat_dates):
             for event in events_by_date[current_date]:
                 # Safely get fields
                 item = str(event.get("item_1") if pd.notna(event.get("item_1")) else "")
+                salesperson = str(event.get("salesperson") if pd.notna(event.get("salesperson")) else "")
                 bil_jam = str(event.get("bil_jam") if pd.notna(event.get("bil_jam")) else "")
                 branch = str(event.get("branch") if pd.notna(event.get("branch")) else "Unknown")
 
@@ -244,3 +245,4 @@ for i, day in enumerate(flat_dates):
                 )
         else:
             st.write("—")
+
