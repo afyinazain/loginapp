@@ -160,29 +160,6 @@ calendar_options = {
         "right": ""
     }
 }
-# -----------------------
-# BRANCH COLOR GUIDE (show all branches always)
-# -----------------------
-st.markdown("### 🏢 Branch Color Guide")
-
-# Always display all branches from the original CSV
-all_branches = df["branch"].dropna().unique().tolist()
-
-legend_html = "<div style='display:flex; flex-wrap:wrap; gap:10px; margin-bottom:12px;'>"
-
-for branch in all_branches:
-    color = branch_colors.get(branch, "#18c936")
-    legend_html += f"""
-    <div style='display:flex; align-items:center; gap:6px;'>
-        <div style='width:20px; height:20px; background:{color}; border-radius:4px; border:1px solid #000;'></div>
-        <span style='font-size:12px;'>{branch}</span>
-    </div>
-    """
-
-legend_html += "</div>"
-
-st.markdown(legend_html, unsafe_allow_html=True)
-
 # ---------------------------------
 # DISPLAY CALENDAR
 # ---------------------------------
@@ -265,6 +242,7 @@ for i, day in enumerate(flat_dates):
                 )
         else:
             st.write("—")
+
 
 
 
