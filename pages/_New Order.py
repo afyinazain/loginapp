@@ -154,6 +154,7 @@ def order_popup():
     quotation_num = generate_quotation_number(INVOICE_SHEET_ID)
     invoice_num = generate_invoice_number(df)
     st.text_input("Quotation Number", value=quotation_num, disabled=True)
+    st.text_input("Invoice Number", value=invoice_num, disabled=True)
     salesperson = st.text_input("Salesperson",value=st.session_state.user["username"],disabled=True)
     email = st.text_input("Documents will be sent to this address",value=st.session_state.user["email_address"],disabled=True)
     
@@ -387,6 +388,7 @@ for branch in active_branch_list:
         st.write(", ".join(available) if available else "—")
 
         
+
 
 
 
