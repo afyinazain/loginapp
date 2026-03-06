@@ -21,6 +21,23 @@ if "user" not in st.session_state:
     st.session_state.user = None
 
 if st.session_state.user is None:
+    st.warning("Please log in to check schedule and availability")
+    st.subheader("🔐 Login")
+
+    with st.form("login"):
+        username = st.text_input("Username")
+        password = st.text_input("ID", type="password")
+        submit = st.form_submit_button("Login")
+
+        if submit:
+            user = authenticate(username, password)
+            if user:
+                st.session_state.user = user
+                st.success(f"Welcome {user['name']}")
+                st.rerun()
+            else:
+                st.error("Invalid ID")
+    
     st.write("Check availability for each date first before submit the order. Click on the date to check")
 
     # Load data
@@ -79,23 +96,6 @@ if st.session_state.user is None:
     else:
         st.info("No events to show this month.")
 
-    st.warning("Please log in to check schedule and availability")
-    st.subheader("🔐 Login")
-
-    with st.form("login"):
-        username = st.text_input("Username")
-        password = st.text_input("ID", type="password")
-        submit = st.form_submit_button("Login")
-
-        if submit:
-            user = authenticate(username, password)
-            if user:
-                st.session_state.user = user
-                st.success(f"Welcome {user['name']}")
-                st.rerun()
-            else:
-                st.error("Invalid ID")
-
 else:
         
     st.success(f"Hi {st.session_state.user['name']}! We Are Happy To Have You Here")
@@ -120,4 +120,5 @@ else:
     if st.button("Logout"):
         st.session_state.user = None
         st.rerun()
+
 
