@@ -188,12 +188,20 @@ def confirm_dialog(row):
 
     default_item = row.get("item_1", "")
 
-    item_1 = st.selectbox(
+    # Convert stored item string to list (for editing existing quotation)
+    default_items = []
+
+    if isinstance(row.get("item_1"), str) and row.get("item_1"):
+        default_items = [x.strip() for x in row.get("item_1").split(",")]
+
+    item_1_list = st.multiselect(
         "Item 1",
         branch_items,
-        index=branch_items.index(default_item)
-        if default_item in branch_items else 0
+        default=default_items
     )
+
+    # Save back as comma separated text
+    item_1 = ", ".join(item_1_list)
     st.caption(f"Semua pilihan kolam yang aktif di {branch}")
     harga_1 = st.number_input("Harga 1", value=float(row.get("harga_1", 0)))
     item_2 = st.text_input("Item 2", value=row.get("item_2", ""))
@@ -213,8 +221,9 @@ def confirm_dialog(row):
     st.write(f"Tax (SST): RM{tax:.2f}")
     st.write(f"Total Amount: RM{total:.2f}")
 
-    invoice_num = generate_invoice_number(df)
-    st.write(f'Invoice Number For This Order : {invoice_num}')
+    invoice_num = row.get("invoice_num", "")
+    st.write("Invoice Number")
+    st.code(invoice_num)
 
     if st.button("🚀 Submit Confirmation"):
         if not proof or not link_location:
@@ -356,6 +365,7 @@ for _, row in invoices.iterrows():
         st.markdown(f'<a href="{row["wa_link"]}" target="_blank">📲 Template WhatsApp</a>',unsafe_allow_html=True)
         st.markdown(f'<a href="{row["wa_cust"]}" target="_blank">💬 Contact Customer {row["no_tel"]}</a>',unsafe_allow_html=True)
     
+
 
 
 
