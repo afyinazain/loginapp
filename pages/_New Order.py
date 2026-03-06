@@ -216,6 +216,8 @@ def order_popup():
     st.write(f"Subtotal: RM{subtotal:.2f}")
     st.write(f"Tax (SST): RM{tax:.2f}")
     st.write(f"Total Amount: RM{total:.2f}")
+    st.write("Invoice Number")
+    st.code(invoice_num)
 
     delivery_date_str = delivery_date.strftime("%d-%b-%Y")
     col1, col2 = st.columns(2)    
@@ -388,6 +390,7 @@ for branch in active_branch_list:
         st.write(", ".join(available) if available else "—")
 
         
+
 
 
 
