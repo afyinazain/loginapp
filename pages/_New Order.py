@@ -231,7 +231,7 @@ def order_popup():
                 sheet_id=INVOICE_SHEET_ID,
                 sheet_name="OrderList",  # replace with the actual sheet/tab name
                 data={"quotation_num": quotation_num,
-                    "invoice_num": quotation_num,
+                    "invoice_num": invoice_num,
                     "timestamp": timestamp,
                     "nama_pelanggan": nama_pelanggan,
                     "salesperson": salesperson,
@@ -259,7 +259,7 @@ def order_popup():
                 sheet_id=SCHEDULE_SHEET_ID,
                 sheet_name="InvoiceList",  # replace with the actual sheet/tab name
                 data={"quotation_num": quotation_num,
-                    "invoice_num": quotation_num,
+                    "invoice_num": invoice_num,
                     "timestamp": timestamp,
                     "nama_pelanggan": nama_pelanggan,
                     "salesperson": salesperson,
@@ -388,6 +388,7 @@ for branch in active_branch_list:
         st.write(", ".join(available) if available else "—")
 
         
+
 
 
 
