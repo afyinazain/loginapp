@@ -91,7 +91,15 @@ active_branch_list.sort()
 
 #-------DEFINE SHEET ID'S---------
 INVOICE_SHEET_ID = "1zAey2gr64Gjc7299BzEDAEJ4dLqd3HIvOIpnXDufddQ" #form2
+
 SCHEDULE_SHEET_ID = "1qw_0cW4ipW5eYh1_sqUyvZdIcjmYXLcsS4J6Y4NoU6A" #auditsoopaglide
+
+data = read_sheet(
+    sheet_id=INVOICE_SHEET_ID,
+    sheet_name=SHEET_NAME,
+    header_row=1
+)
+df = pd.DataFrame(data)
 
 # ----------------------------
 # POPUP ORDER FORM
@@ -377,6 +385,7 @@ for branch in active_branch_list:
         st.write(", ".join(available) if available else "—")
 
         
+
 
 
 
