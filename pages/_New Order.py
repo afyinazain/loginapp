@@ -6,7 +6,7 @@ from datetime import datetime
 from datetime import timedelta
 from streamlit_calendar import calendar
 
-from utils.sheets import append_row_by_header, generate_quotation_number
+from utils.sheets import append_row_by_header, generate_quotation_number, generate_invoice_number
 
 
 # Check if user is logged in
@@ -91,6 +91,7 @@ active_branch_list.sort()
 
 #-------DEFINE SHEET ID'S---------
 INVOICE_SHEET_ID = "1zAey2gr64Gjc7299BzEDAEJ4dLqd3HIvOIpnXDufddQ" #form2
+SHEET_NAME = "OrderList"
 
 SCHEDULE_SHEET_ID = "1qw_0cW4ipW5eYh1_sqUyvZdIcjmYXLcsS4J6Y4NoU6A" #auditsoopaglide
 
@@ -151,6 +152,7 @@ def order_popup():
     st.write(f"## 📅 Delivery Date: {selected_date}")
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     quotation_num = generate_quotation_number(INVOICE_SHEET_ID)
+    invoice_num = generate_invoice_number(df)
     st.text_input("Quotation Number", value=quotation_num, disabled=True)
     salesperson = st.text_input("Salesperson",value=st.session_state.user["username"],disabled=True)
     email = st.text_input("Documents will be sent to this address",value=st.session_state.user["email_address"],disabled=True)
@@ -385,6 +387,7 @@ for branch in active_branch_list:
         st.write(", ".join(available) if available else "—")
 
         
+
 
 
 
