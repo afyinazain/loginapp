@@ -37,7 +37,7 @@ df = pd.DataFrame(data)
 
 # Clean data
 df["total"] = pd.to_numeric(df["total"], errors="coerce").fillna(0)
-df["lookup_pivot3"] = pd.to_numeric(df["lookup_pivot3"], errors="coerce").fillna(0)
+df["outstanding_payment"] = pd.to_numeric(df["outstanding_payment"], errors="coerce").fillna(0)
 df["delivery_date"] = pd.to_datetime(df["delivery_date"], errors="coerce")
 df["doc_date"] = pd.to_datetime(df["doc_date"], errors="coerce")
 
@@ -172,6 +172,7 @@ monthly_sales = (
 )
 
 st.line_chart(monthly_sales)
+
 
 
 
