@@ -172,7 +172,7 @@ def order_popup():
     ]
     
     available_branch_items1 = get_available_by_branch(branch)
-
+    item_1 = st.text_input("Item 1")
     item_1 = st.multiselect(
     "Item 1",
     available_branch_items1,
@@ -390,6 +390,7 @@ for branch in active_branch_list:
         st.write(", ".join(available) if available else "—")
 
         
+
 
 
 
