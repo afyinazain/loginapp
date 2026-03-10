@@ -102,43 +102,42 @@ st.bar_chart(branch_sales)
 st.divider()
 
 # ----------------------------
-# SALESPERSON PERFORMANCE (Last 6 Months)
+# SALESPERSON PERFORMANCE (Last 6 Months by Delivery Month)
 # ----------------------------
 
 st.subheader("👤 Salesperson Performance (Last 6 Months)")
 
-# Remove rows with empty delivery date
+# Remove rows without delivery_date
 df_sales = df[df["delivery_date"].notna()].copy()
 
 # Convert delivery_date to month
-df_sales["month"] = df_sales["delivery_date"].dt.to_period("M").dt.to_timestamp()
+df_sales["month"] = df_sales["delivery_date"].dt.to_period("M")
 
 # Get latest 6 months
 latest_month = df_sales["month"].max()
-six_months_ago = latest_month - pd.DateOffset(months=5)
+last_6_months = [latest_month - i for i in range(5, -1, -1)]
 
-df_sales = df_sales[df_sales["month"] >= six_months_ago]
+df_sales = df_sales[df_sales["month"].isin(last_6_months)]
 
-# Group data
+# Group by month + salesperson
 salesperson_monthly = (
     df_sales.groupby(["month", "salesperson"])["total"]
     .sum()
     .reset_index()
 )
 
-# Pivot table for chart
+# Pivot table so each salesperson becomes a line
 chart_data = salesperson_monthly.pivot(
     index="month",
     columns="salesperson",
     values="total"
 ).fillna(0)
 
-# Sort months
-chart_data = chart_data.sort_index()
+# Convert month to readable format
+chart_data.index = chart_data.index.astype(str)
 
-# Plot chart
+# Line chart
 st.line_chart(chart_data, use_container_width=True)
-
 
 # ----------------------------
 # OUTSTANDING PAYMENTS
@@ -177,5 +176,6 @@ monthly_sales = (
 )
 
 st.line_chart(monthly_sales)
+
 
 
