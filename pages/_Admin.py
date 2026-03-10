@@ -102,20 +102,33 @@ st.bar_chart(branch_sales)
 st.divider()
 
 # ----------------------------
-# SALESPERSON PERFORMANCE
+# SALESPERSON PERFORMANCE (Monthly Line Chart)
 # ----------------------------
 
-st.subheader("👤 Salesperson Performance")
+st.subheader("👤 Salesperson Monthly Performance")
 
-salesperson_sales = (
-    df.groupby("salesperson")["total"]
+# Create month column
+df["month"] = df["doc_date"].dt.to_period("M").astype(str)
+
+# Group by month and salesperson
+salesperson_monthly = (
+    df.groupby(["month", "salesperson"])["total"]
     .sum()
-    .sort_values(ascending=False)
+    .reset_index()
 )
 
-st.bar_chart(salesperson_sales)
+# Pivot so each salesperson becomes a column
+salesperson_chart = salesperson_monthly.pivot(
+    index="month",
+    columns="salesperson",
+    values="total"
+).fillna(0)
 
-st.divider()
+# Sort months correctly
+salesperson_chart = salesperson_chart.sort_index()
+
+# Line chart
+st.line_chart(salesperson_chart, use_container_width=True)
 
 # ----------------------------
 # OUTSTANDING PAYMENTS
@@ -154,3 +167,4 @@ monthly_sales = (
 )
 
 st.line_chart(monthly_sales)
+
