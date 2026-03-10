@@ -164,7 +164,7 @@ st.divider()
 
 st.subheader("📈 Monthly Revenue Trend")
 
-df["month"] = df["doc_date"].dt.to_period("M").astype(str)
+df["month"] = df["delivery_date"].dt.to_period("M").astype(str)
 
 monthly_sales = (
     df.groupby("month")["total"]
@@ -172,6 +172,7 @@ monthly_sales = (
 )
 
 st.line_chart(monthly_sales)
+
 
 
 
