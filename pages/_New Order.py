@@ -154,7 +154,7 @@ def order_popup():
     quotation_num = generate_quotation_number(INVOICE_SHEET_ID)
     invoice_num = generate_invoice_number(df)
     st.text_input("Quotation Number", value=quotation_num, disabled=True)
-    st.text_input("Invoice Number", value=invoice_num, disabled=True)
+    st.text_input("Invoice Number", value=invoice_num)
     salesperson = st.text_input("Salesperson",value=st.session_state.user["username"],disabled=True)
     email = st.text_input("Documents will be sent to this address",value=st.session_state.user["email_address"],disabled=True)
     
@@ -172,14 +172,14 @@ def order_popup():
     ]
     
     available_branch_items1 = get_available_by_branch(branch)
-    item_1 = st.text_input("Item 1")
+    
     item_1 = st.multiselect(
-    "Item 1",
+    "Item 1 (rental)",
     available_branch_items1,
     placeholder="Choose available item"
     )    
 
-
+    item_1 = st.text_input("Item 1 (untuk item SELAIN rental)")
     nama_pelanggan = st.text_input("Nama Penuh Pelanggan")
     delivery_date = selected_date
     expiry_date = datetime.today() + timedelta(days=5)
@@ -390,6 +390,7 @@ for branch in active_branch_list:
         st.write(", ".join(available) if available else "—")
 
         
+
 
 
 
