@@ -146,7 +146,7 @@ unpaid = df[df["outstanding_payment"] > 0]
 unpaid_table = unpaid[
     [
         "invoice_num",
-        "nama_pelanggan",
+        "salesperson",
         "branch",
         "total",
         "outstanding_payment",
@@ -172,6 +172,7 @@ monthly_sales = (
 )
 
 st.line_chart(monthly_sales)
+
 
 
 
