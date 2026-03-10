@@ -42,7 +42,7 @@ df["delivery_date"] = pd.to_datetime(df["delivery_date"], errors="coerce")
 df["doc_date"] = pd.to_datetime(df["doc_date"], errors="coerce")
 
 # Only invoices
-df = df[df["type_status"] == "Invoice"]
+df = df[df["TYPE"] == "INV-R"]
 
 today = pd.Timestamp.today()
 
@@ -52,10 +52,10 @@ today = pd.Timestamp.today()
 
 month_start = today.replace(day=1)
 
-orders_month = df[df["doc_date"] >= month_start]
+orders_month = df[df["delivery_date"] >= month_start]
 sales_month = orders_month["total"].sum()
 
-outstanding = df["lookup_pivot3"].sum()
+outstanding = df["outstanding_payment"].sum()
 
 upcoming = df[
     (df["delivery_date"] >= today) &
@@ -91,11 +91,7 @@ st.divider()
 
 st.subheader("🏢 Branch Performance")
 
-branch_sales = (
-    df.groupby("branch")["total"]
-    .sum()
-    .sort_values(ascending=False)
-)
+branch_sales = (df.groupby("branch")["total"].sum().sort_values(ascending=False))
 
 st.bar_chart(branch_sales)
 
@@ -145,7 +141,7 @@ st.line_chart(chart_data, use_container_width=True)
 
 st.subheader("⚠️ Outstanding Payments")
 
-unpaid = df[df["lookup_pivot3"] > 0]
+unpaid = df[df["outstanding_payment"] > 0]
 
 unpaid_table = unpaid[
     [
@@ -153,7 +149,7 @@ unpaid_table = unpaid[
         "nama_pelanggan",
         "branch",
         "total",
-        "lookup_pivot3",
+        "outstanding_payment",
         "delivery_date"
     ]
 ].sort_values("delivery_date")
@@ -176,6 +172,7 @@ monthly_sales = (
 )
 
 st.line_chart(monthly_sales)
+
 
 
 
