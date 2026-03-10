@@ -56,8 +56,8 @@ data_inv = read_sheet(
 
 df_inv = pd.DataFrame(data_inv)
 
-df_inv["lookup_pivot3"] = pd.to_numeric(
-    df_inv["lookup_pivot3"],
+df_inv["outstanding_payment"] = pd.to_numeric(
+    df_inv["outstanding_payment"],
     errors="coerce"
 )
 
@@ -69,7 +69,7 @@ df_inv["delivery_date"] = pd.to_datetime(
 invoices = df_inv[
     (df_inv["salesperson"] == user_name) &
     (df_inv["type_status"] == "Invoice") &
-    (df_inv["lookup_pivot3"] > 0) &
+    (df_inv["outstanding_payment"] > 0) &
     (df_inv["delivery_date"] > pd.Timestamp.today())
 ]
 
@@ -77,7 +77,7 @@ invoices = df_inv[
 pending_payment = df_inv[
     (df_inv["salesperson"] == user_name) &
     (df_inv["type_status"] == "Invoice") &
-    (df_inv["lookup_pivot3"] > 0) &
+    (df_inv["outstanding_payment"] > 0) &
     (df_inv["delivery_date"] <= pd.Timestamp.today())
 ]
 
@@ -365,6 +365,7 @@ for _, row in invoices.iterrows():
         st.markdown(f'<a href="{row["wa_link"]}" target="_blank">📲 Template WhatsApp</a>',unsafe_allow_html=True)
         st.markdown(f'<a href="{row["wa_cust"]}" target="_blank">💬 Contact Customer {row["no_tel"]}</a>',unsafe_allow_html=True)
     
+
 
 
 
