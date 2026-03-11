@@ -127,6 +127,7 @@ df_ledger = pd.DataFrame(data)
 
 # Make sure money_in column is numeric for checking
 df_ledger["money_in"] = pd.to_numeric(df_ledger["money_in"], errors="coerce")
+df_ledger["money_out"] = pd.to_numeric(df_ledger["money_out"], errors="coerce")
 
 st.subheader("💰 Cash Flow Input")
 
@@ -135,8 +136,10 @@ events = df_ledger["recipient_name"].dropna().unique().tolist()
 
 selected_event = st.selectbox("Select Event", events)
 
-# Filter ledger for selected event
-df_event = df_ledger[df_ledger["recipient_name"] == selected_event]
+# Filter rows for this event
+df_event = df_ledger[df_ledger["recipient_name"] == selected_event].copy()
+
+st.info("Edit `money_in` and `money_out` directly below. Changes will update the existing ledger rows.")
 
 # Only keep rows where money_in is empty
 df_pending = df_event[df_event["money_in"].isna() | (df_event["money_in"] == "")]
@@ -152,24 +155,32 @@ next_date = next_row["date"]
 
 st.write(f"Next date to record cash flow: **{next_date}**")
 
+# Use Streamlit data editor for inline editing
+edited_df = st.data_editor(
+    df_event,
+    num_rows="dynamic",
+    use_container_width=True
+)
+
 col1, col2 = st.columns(2)
 with col1:
     money_in = st.number_input("Money In (RM)", value=0.0, step=1.0, format="%.2f")
 with col2:
     money_out = st.number_input("Money Out (RM)", value=0.0, step=1.0, format="%.2f")
 
-# Submit button
-if st.button("Submit Cash Flow"):
-    # Dynamically find column indices by header name
+# Update button
+if st.button("Update Ledger"):
     headers = sheet.row_values(5)  # header row
-    money_in_col = headers.index("money_in") + 1  # gspread is 1-indexed
-    money_out_col = headers.index("money_out") + 1
+    for idx, row in edited_df.iterrows():
+        # Find row index in Google Sheet
+        df_index = df_ledger.index[df_ledger["date"] == row["date"]][0]
+        sheet_row_index = df_index + 6  # +6 because header is row 5
 
-    # Find row index in Google Sheet (add 6 because row 5 is header, DataFrame index starts at 0)
-    row_index = df_ledger.index[df_ledger["date"] == next_date][0] + 6
+        # Update money_in and money_out dynamically
+        money_in_col = headers.index("money_in") + 1
+        money_out_col = headers.index("money_out") + 1
 
-    # Update money_in and money_out dynamically
-    sheet.update_cell(row_index, money_in_col, money_in)
-    sheet.update_cell(row_index, money_out_col, money_out)
+        sheet.update_cell(sheet_row_index, money_in_col, row["money_in"])
+        sheet.update_cell(sheet_row_index, money_out_col, row["money_out"])
 
-    st.success(f"💾 Cash flow for {next_date} updated successfully!")
+    st.success("💾 Ledger updated successfully!")
