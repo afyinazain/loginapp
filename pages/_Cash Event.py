@@ -110,7 +110,7 @@ if st.button("Generate Ledger"):
                 "receipt": "",
                 "status": acc,
                 "job_num": job_num,
-                "recipient_name": "",
+                "recipient_name": event_name,
                 "tin_num": "",
                 "username": username
             }
