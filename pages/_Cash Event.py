@@ -43,9 +43,15 @@ SHEET_ID = "1qw_0cW4ipW5eYh1_sqUyvZdIcjmYXLcsS4J6Y4NoU6A"
 SHEET_NAME = "Cash Event"
 sheet = client.open_by_key(SHEET_ID).worksheet(SHEET_NAME)
 
-# Read header in row 5
+# Load data (header row 5)
 data = sheet.get_all_records(head=5)
-df_existing = pd.DataFrame(data)
+df_ledger = pd.DataFrame(data)
+
+# Ensure Amount column exists for numeric calculations
+if "Amount" not in df_ledger.columns:
+    df_ledger["Amount"] = pd.NA
+else:
+    df_ledger["Amount"] = pd.to_numeric(df_ledger["Amount"], errors="coerce")
 
 # -----------------------------
 # SHOW BUTTON TO OPEN LEDGER FORM
