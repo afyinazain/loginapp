@@ -2,11 +2,32 @@ import streamlit as st
 import pandas as pd
 from datetime import datetime
 
+# Check if user is logged in
+if "user" not in st.session_state or st.session_state.user is None:
+    st.warning("❌ You must log in first to access this page.")
+    st.stop()  # stops the rest of the page from running
+
+# Check if user is admin
+if st.session_state.user.get("role") != "admin":
+    st.error("🚫 You do not have permission to access this page.")
+    st.stop()
+    
 st.title("🎪 Event Cash Flow Management")
 
-conn = st.connection("gsheets")
+# ----------------------------
+# LOAD DATA
+# ----------------------------
 
-df = conn.read(worksheet="Event_Cashflow", ttl=0)
+GLIDE_SHEET_ID = "1qw_0cW4ipW5eYh1_sqUyvZdIcjmYXLcsS4J6Y4NoU6A"
+INVOICE_SHEET_NAME = "InvoiceList"
+
+data = read_sheet(
+    sheet_id=GLIDE_SHEET_ID,
+    sheet_name=INVOICE_SHEET_NAME,
+    header_row=7
+)
+
+df = pd.DataFrame(data)
 
 # -----------------------
 # EVENT SELECTION
@@ -20,7 +41,8 @@ with col1:
     event_name = st.text_input("Event Name")
 
 with col2:
-    event_date = st.date_input("Event Date")
+    start_date = st.date_input("Event Start Date")
+    end_date = st.date_input("Event End Date")
 
 # -----------------------
 # CASH ENTRY FORM
