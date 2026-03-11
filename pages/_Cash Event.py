@@ -119,3 +119,6 @@ if st.button("➕ Create Event Ledger"):
 
             st.success(f"{len(df_new)} rows successfully generated!")
             st.dataframe(df_new)
+
+            # Hide form after generation (optional)
+            st.session_state.show_ledger_form = False
