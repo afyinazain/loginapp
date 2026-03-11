@@ -121,66 +121,110 @@ with st.expander("📝 Event Ledger Generator", expanded=True):
         
 #------------------------------------
 
-# Load existing ledger
-data = sheet.get_all_records(head=5)
-df_ledger = pd.DataFrame(data)
+# -----------------------------
+# CASH FLOW INPUT PAGE
+# -----------------------------
+st.title("💰 Event Cash Flow Input")
 
-# Make sure money_in column is numeric for checking
-df_ledger["money_in"] = pd.to_numeric(df_ledger["money_in"], errors="coerce")
-df_ledger["money_out"] = pd.to_numeric(df_ledger["money_out"], errors="coerce")
-
-st.subheader("💰 Cash Flow Input")
-
-# Get list of registered events
+# 1️⃣ Select Event
 events = df_ledger["recipient_name"].dropna().unique().tolist()
-
 selected_event = st.selectbox("Select Event", events)
 
-# Filter rows for this event
 df_event = df_ledger[df_ledger["recipient_name"] == selected_event].copy()
 
-st.info("Edit `money_in` and `money_out` directly below. Changes will update the existing ledger rows.")
-
-# Only keep rows where money_in is empty
-df_pending = df_event[df_event["money_in"].isna() | (df_event["money_in"] == "")]
-
-if df_pending.empty:
-    st.info("All dates for this event already have money recorded.")
+if df_event.empty:
+    st.warning("No ledger rows exist for this event yet.")
     st.stop()
 
-# Take the earliest date
-df_pending["date_dt"] = pd.to_datetime(df_pending["date"], format="%d %b %y")
-next_row = df_pending.sort_values("date_dt").iloc[0]
-next_date = next_row["date"]
+# 2️⃣ Pick Date that has missing money_in
+# Find dates where Type=IN is missing for any account
+all_accounts = df_event["status"].dropna().unique().tolist()
+date_account_pairs = []
 
-st.write(f"Next date to record cash flow: **{next_date}**")
+for d in df_event["date"].dropna().unique():
+    df_day = df_event[df_event["date"] == d]
+    for acc in all_accounts:
+        if not ((df_day["status"] == acc) & (df_day["Type"] == "IN")).any():
+            date_account_pairs.append(d)
 
-# Use Streamlit data editor for inline editing
-edited_df = st.data_editor(
-    df_event,
-    num_rows="dynamic",
-    use_container_width=True
-)
+if not date_account_pairs:
+    st.success("✅ All dates have money_in recorded for all accounts.")
+    st.stop()
 
-col1, col2 = st.columns(2)
-with col1:
-    money_in = st.number_input("Money In (RM)", value=0.0, step=1.0, format="%.2f")
-with col2:
-    money_out = st.number_input("Money Out (RM)", value=0.0, step=1.0, format="%.2f")
+next_date = sorted(pd.to_datetime(date_account_pairs, format="%d %b %y"))[0].strftime("%d %b %y")
+st.write(f"Next date to input cash inflow: **{next_date}**")
 
-# Update button
-if st.button("Update Ledger"):
-    headers = sheet.row_values(5)  # header row
-    for idx, row in edited_df.iterrows():
-        # Find row index in Google Sheet
-        df_index = df_ledger.index[df_ledger["date"] == row["date"]][0]
-        sheet_row_index = df_index + 6  # +6 because header is row 5
+# 3️⃣ Money In Form
+st.subheader("Money In Entries")
+money_in_dict = {}
+for acc in all_accounts:
+    # Check if this account already has money_in for this date
+    df_check = df_event[(df_event["date"] == next_date) & (df_event["status"] == acc) & (df_event["Type"] == "IN")]
+    if df_check.empty:
+        money_in_dict[acc] = st.number_input(f"Money In - {acc}", min_value=0.0, value=0.0, step=1.0, format="%.2f")
 
-        # Update money_in and money_out dynamically
-        money_in_col = headers.index("money_in") + 1
-        money_out_col = headers.index("money_out") + 1
+# 4️⃣ Money Out Form
+st.subheader("Money Out Entries (Optional)")
+money_out_list = []
+if st.checkbox("Add Money Out for this date"):
+    num_out = st.number_input("How many money out entries?", min_value=1, max_value=10, value=1, step=1)
+    for i in range(num_out):
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            acc = st.selectbox(f"Account for OUT #{i+1}", all_accounts, key=f"out_acc_{i}")
+        with col2:
+            amt = st.number_input(f"Amount OUT #{i+1}", min_value=0.0, value=0.0, step=1.0, format="%.2f", key=f"out_amt_{i}")
+        with col3:
+            category = st.text_input(f"Category OUT #{i+1}", value="Expense", key=f"out_cat_{i}")
+        money_out_list.append({"status": acc, "Amount": amt, "Category": category})
 
-        sheet.update_cell(sheet_row_index, money_in_col, row["money_in"])
-        sheet.update_cell(sheet_row_index, money_out_col, row["money_out"])
+# 5️⃣ Submit Button
+if st.button("Submit Cash Flow"):
 
-    st.success("💾 Ledger updated successfully!")
+    rows_to_append = []
+
+    timestamp = datetime.now().strftime("%d %b %H:%M")
+
+    # Money In Rows
+    for acc, amt in money_in_dict.items():
+        if amt > 0:
+            row = {
+                "Timestamp": timestamp,
+                "recipient_name": selected_event,
+                "job_num": df_event["job_num"].iloc[0],
+                "date": next_date,
+                "status": acc,
+                "Type": "IN",
+                "Category": "Sales Event",
+                "Amount": amt,
+                "note": "",
+                "username": st.session_state.get("username", "unknown")
+            }
+            rows_to_append.append(row)
+
+    # Money Out Rows
+    for out in money_out_list:
+        if out["Amount"] > 0:
+            row = {
+                "Timestamp": timestamp,
+                "recipient_name": selected_event,
+                "job_num": df_event["job_num"].iloc[0],
+                "date": next_date,
+                "status": out["status"],
+                "Type": "OUT",
+                "Category": out["Category"],
+                "Amount": out["Amount"],
+                "note": "",
+                "username": st.session_state.get("username", "unknown")
+            }
+            rows_to_append.append(row)
+
+    if rows_to_append:
+        df_new = pd.DataFrame(rows_to_append)
+
+        # Append to Google Sheet dynamically (header row 5)
+        sheet.append_rows(df_new.values.tolist())
+
+        st.success(f"💾 {len(df_new)} cash flow entries recorded for {next_date}!")
+    else:
+        st.warning("No amounts entered to submit.")
