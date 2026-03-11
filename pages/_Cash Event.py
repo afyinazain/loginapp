@@ -55,7 +55,7 @@ with st.expander("📝 Event Ledger Generator", expanded=True):
     event_name = st.text_input("Event Name")
     job_num = st.text_input("Job Number")
 
-    username = st.session_state.get("username", "unknown")
+    username = st.session_state.user["username"]
 
     col1, col2 = st.columns(2)
     with col1:
