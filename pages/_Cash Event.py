@@ -122,12 +122,6 @@ if st.button("Generate Ledger"):
     # Replace NaN with empty strings to avoid InvalidJSONError
     df_new = df_new.fillna("")
 
-    # Append to Google Sheet without touching header row
-    sheet.append_rows(df_new.values.tolist())
-
-    st.success(f"{len(df_new)} rows successfully generated!")
-    st.dataframe(df_new)
-    
     # -----------------------------
     # CHECK DUPLICATE EVENT
     # -----------------------------
@@ -141,4 +135,12 @@ if st.button("Generate Ledger"):
         if not duplicate.empty:
             st.error("Ledger for this job number already exists.")
             st.stop()
+
+    # Append to Google Sheet without touching header row
+    sheet.append_rows(df_new.values.tolist())
+
+    st.success(f"{len(df_new)} rows successfully generated!")
+    st.dataframe(df_new)
+    
+    
 
