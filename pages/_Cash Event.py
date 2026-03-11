@@ -50,11 +50,6 @@ df_existing = pd.DataFrame(data)
 # -----------------------------
 # SHOW BUTTON TO OPEN LEDGER FORM
 # -----------------------------
-
-# Toggle for showing ledger form
-if "show_ledger_form" not in st.session_state:
-    st.session_state.show_ledger_form = False
-    
     
 # Show form if toggle is True
 if st.session_state.show_ledger_form:
