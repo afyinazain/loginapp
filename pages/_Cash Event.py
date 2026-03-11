@@ -118,3 +118,58 @@ with st.expander("📝 Event Ledger Generator", expanded=True):
 
         st.success(f"{len(df_new)} rows successfully generated!")
         st.dataframe(df_new)
+        
+#------------------------------------
+
+# Load existing ledger
+data = sheet.get_all_records(head=5)
+df_ledger = pd.DataFrame(data)
+
+# Make sure money_in column is numeric for checking
+df_ledger["money_in"] = pd.to_numeric(df_ledger["money_in"], errors="coerce")
+
+st.subheader("💰 Cash Flow Input")
+
+# Get list of registered events
+events = df_ledger["recipient_name"].dropna().unique().tolist()
+
+selected_event = st.selectbox("Select Event", events)
+
+# Filter ledger for selected event
+df_event = df_ledger[df_ledger["recipient_name"] == selected_event]
+
+# Only keep rows where money_in is empty
+df_pending = df_event[df_event["money_in"].isna() | (df_event["money_in"] == "")]
+
+if df_pending.empty:
+    st.info("All dates for this event already have money recorded.")
+    st.stop()
+
+# Take the earliest date
+df_pending["date_dt"] = pd.to_datetime(df_pending["date"], format="%d %b %y")
+next_row = df_pending.sort_values("date_dt").iloc[0]
+next_date = next_row["date"]
+
+st.write(f"Next date to record cash flow: **{next_date}**")
+
+col1, col2 = st.columns(2)
+with col1:
+    money_in = st.number_input("Money In (RM)", value=0.0, step=1.0, format="%.2f")
+with col2:
+    money_out = st.number_input("Money Out (RM)", value=0.0, step=1.0, format="%.2f")
+
+# Submit button
+if st.button("Submit Cash Flow"):
+    # Dynamically find column indices by header name
+    headers = sheet.row_values(5)  # header row
+    money_in_col = headers.index("money_in") + 1  # gspread is 1-indexed
+    money_out_col = headers.index("money_out") + 1
+
+    # Find row index in Google Sheet (add 6 because row 5 is header, DataFrame index starts at 0)
+    row_index = df_ledger.index[df_ledger["date"] == next_date][0] + 6
+
+    # Update money_in and money_out dynamically
+    sheet.update_cell(row_index, money_in_col, money_in)
+    sheet.update_cell(row_index, money_out_col, money_out)
+
+    st.success(f"💾 Cash flow for {next_date} updated successfully!")
