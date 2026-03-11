@@ -136,101 +136,113 @@ st.title("💰 Event Cash Flow Input")
 events = df_ledger["recipient_name"].dropna().unique().tolist()
 selected_event = st.selectbox("Select Event", events)
 
-df_event = df_ledger[df_ledger["recipient_name"] == selected_event].copy()
+df_event = df_ledger[df_ledger["recipient_name"] == selected_event]
+df_event["date_dt"] = pd.to_datetime(df_event["date"], format="%d %b %y")
+start_date = df_event["date_dt"].min()
+end_date = df_event["date_dt"].max()
 
-if df_event.empty:
-    st.warning("No ledger rows exist for this event yet.")
-    st.stop()
+date_range = pd.date_range(start_date, end_date)
 
-# 2️⃣ Pick Date that has missing money_in
-# Find dates where Type=IN is missing for any account
-all_accounts = df_event["status"].dropna().unique().tolist()
-date_account_pairs = []
+st.subheader("Event Cash Calendar")
 
-for d in df_event["date"].dropna().unique():
-    df_day = df_event[df_event["date"] == d]
-    for acc in all_accounts:
-        if not ((df_day["status"] == acc) & (df_day["Type"] == "IN")).any():
-            date_account_pairs.append(d)
+cols = st.columns(7)
 
-if not date_account_pairs:
-    st.success("✅ All dates have money_in recorded for all accounts.")
-    st.stop()
+for i, d in enumerate(date_range):
 
-next_date = sorted(pd.to_datetime(date_account_pairs, format="%d %b %y"))[0].strftime("%d %b %y")
-st.write(f"Next date to input cash inflow: **{next_date}**")
+    df_day = df_event[df_event["date_dt"] == d]
 
-# 3️⃣ Money In Form
-st.subheader("Money In Entries")
-money_in_dict = {}
-for acc in all_accounts:
-    # Check if this account already has money_in for this date
-    df_check = df_event[(df_event["date"] == next_date) & (df_event["status"] == acc) & (df_event["Type"] == "IN")]
-    if df_check.empty:
-        money_in_dict[acc] = st.number_input(f"Money In - {acc}", min_value=0.0, value=0.0, step=1.0, format="%.2f")
+    label = d.strftime("%d %b")
 
-# 4️⃣ Money Out Form
-st.subheader("Money Out Entries (Optional)")
-money_out_list = []
-if st.checkbox("Add Money Out for this date"):
-    num_out = st.number_input("How many money out entries?", min_value=1, max_value=10, value=1, step=1)
-    for i in range(num_out):
-        col1, col2, col3 = st.columns(3)
-        with col1:
-            acc = st.selectbox(f"Account for OUT #{i+1}", all_accounts, key=f"out_acc_{i}")
-        with col2:
-            amt = st.number_input(f"Amount OUT #{i+1}", min_value=0.0, value=0.0, step=1.0, format="%.2f", key=f"out_amt_{i}")
-        with col3:
-            category = st.text_input(f"Category OUT #{i+1}", value="Expense", key=f"out_cat_{i}")
-        money_out_list.append({"status": acc, "Amount": amt, "Category": category})
+    txn_text = ""
 
-# 5️⃣ Submit Button
-if st.button("Submit Cash Flow"):
+    if not df_day.empty:
 
-    rows_to_append = []
+        for _, row in df_day.iterrows():
+
+            if pd.notna(row["money_in"]) and row["money_in"] != "":
+                txn_text += f"\n+ {row['item']} RM{float(row['money_in']):.2f}"
+
+            if pd.notna(row["money_out"]) and row["money_out"] != "":
+                txn_text += f"\n- {row['item']} RM{float(row['money_out']):.2f}"
+
+    full_label = label + txn_text
+
+    with cols[i % 7]:
+
+        if st.button(full_label, key=f"day_{i}"):
+
+            st.session_state["selected_cash_date"] = d
+
+if "selected_cash_date" in st.session_state:
+
+    selected_date = st.session_state["selected_cash_date"]
+
+    st.subheader(f"Cash Entry : {selected_date.strftime('%d %b %Y')}")
+
+accounts = df_event["status"].dropna().unique()
+
+money_in_data = {}
+
+for acc in accounts:
+    money_in_data[acc] = st.number_input(
+        f"Money In - {acc}",
+        min_value=0.0,
+        step=1.0
+    )
+
+st.subheader("Money Out")
+
+out_account = st.selectbox("Account", accounts)
+
+out_amount = st.number_input("Amount Out", min_value=0.0)
+
+out_note = st.text_input("Note")
+
+if st.button("Save Transaction"):
+
+    rows = []
 
     timestamp = datetime.now().strftime("%d %b %H:%M")
 
-    # Money In Rows
-    for acc, amt in money_in_dict.items():
+    for acc, amt in money_in_data.items():
+
         if amt > 0:
-            row = {
-                "Timestamp": timestamp,
-                "recipient_name": selected_event,
-                "job_num": df_event["job_num"].iloc[0],
-                "date": next_date,
-                "status": acc,
-                "Type": "IN",
-                "Category": "Sales Event",
-                "Amount": amt,
-                "note": "",
-                "username": st.session_state.get("username", "unknown")
-            }
-            rows_to_append.append(row)
 
-    # Money Out Rows
-    for out in money_out_list:
-        if out["Amount"] > 0:
-            row = {
-                "Timestamp": timestamp,
-                "recipient_name": selected_event,
-                "job_num": df_event["job_num"].iloc[0],
-                "date": next_date,
-                "status": out["status"],
-                "Type": "OUT",
-                "Category": out["Category"],
-                "Amount": out["Amount"],
-                "note": "",
-                "username": st.session_state.get("username", "unknown")
-            }
-            rows_to_append.append(row)
+            rows.append([
+                timestamp,
+                selected_event,
+                df_event["job_num"].iloc[0],
+                selected_date.strftime("%d %b %y"),
+                acc,
+                "Sales",
+                "Sales Event",
+                amt,
+                "",
+                "",
+                st.session_state.get("username","unknown")
+            ])
 
-    if rows_to_append:
-        df_new = pd.DataFrame(rows_to_append)
+    if out_amount > 0:
 
-        # Append to Google Sheet dynamically (header row 5)
-        sheet.append_rows(df_new.values.tolist())
+        rows.append([
+            timestamp,
+            selected_event,
+            df_event["job_num"].iloc[0],
+            selected_date.strftime("%d %b %y"),
+            out_account,
+            "Expense",
+            "Expense",
+            "",
+            out_amount,
+            out_note,
+            st.session_state.get("username","unknown")
+        ])
 
-        st.success(f"💾 {len(df_new)} cash flow entries recorded for {next_date}!")
-    else:
-        st.warning("No amounts entered to submit.")
+    sheet.append_rows(rows)
+
+    st.success("Transaction recorded.")
+
+
+
+
+
