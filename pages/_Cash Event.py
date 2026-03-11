@@ -44,7 +44,7 @@ SHEET_NAME = "Cash Event"
 
 sheet = client.open_by_key(SHEET_ID).worksheet(SHEET_NAME)
 
-data = sheet.get_all_records()
+data = sheet.get_all_records(head=5)
 df_existing = pd.DataFrame(data)
 
 # -----------------------------
