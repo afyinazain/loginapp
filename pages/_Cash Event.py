@@ -50,8 +50,17 @@ df_existing = pd.DataFrame(data)
 # -----------------------------
 # SHOW BUTTON TO OPEN LEDGER FORM
 # -----------------------------
-if st.button("➕ Create Event Ledger"):
 
+# Toggle for showing ledger form
+if "show_ledger_form" not in st.session_state:
+    st.session_state.show_ledger_form = False
+    
+# Button to show/hide the ledger form
+if st.button("➕ Create Event Ledger"):
+    st.session_state.show_ledger_form = True
+    
+# Show form if toggle is True
+if st.session_state.show_ledger_form:
     with st.expander("📝 Event Ledger Generator", expanded=True):
         event_name = st.text_input("Event Name")
         job_num = st.text_input("Job Number")
