@@ -51,75 +51,70 @@ df_existing = pd.DataFrame(data)
 # SHOW BUTTON TO OPEN LEDGER FORM
 # -----------------------------
     
-# Show form if toggle is True
-if st.session_state.show_ledger_form:
-    with st.expander("➕ Event Ledger Generator", expanded=True):
-        event_name = st.text_input("Event Name")
-        job_num = st.text_input("Job Number")
+with st.expander("📝 Event Ledger Generator", expanded=True):
+    event_name = st.text_input("Event Name")
+    job_num = st.text_input("Job Number")
 
-        username = st.session_state.user["username"]
+    username = st.session_state.get("username", "unknown")
 
-        col1, col2 = st.columns(2)
-        with col1:
-            start_date = st.date_input("Start Date")
-        with col2:
-            end_date = st.date_input("End Date")
+    col1, col2 = st.columns(2)
+    with col1:
+        start_date = st.date_input("Start Date")
+    with col2:
+        end_date = st.date_input("End Date")
 
-        accounts = st.multiselect(
-            "Select Account Types",
-            ["CASH", "QR", "TNG", "BANK1"]
-        )
+    accounts = st.multiselect(
+        "Select Account Types",
+        ["CASH", "QR", "TNG", "BANK1"]
+    )
 
-        if st.button("Generate Ledger"):
-            if event_name == "" or job_num == "" or username == "":
-                st.warning("Please fill Event Name, Job Number and Username")
+    if st.button("Generate Ledger"):
+        if event_name == "" or job_num == "" or username == "":
+            st.warning("Please fill Event Name, Job Number and Username")
+            st.stop()
+
+        if len(accounts) == 0:
+            st.warning("Select at least one account type")
+            st.stop()
+
+        # Create date range
+        dates = pd.date_range(start_date, end_date)
+
+        rows = []
+        for d in dates:
+            for acc in accounts:
+                row = {
+                    "Timestamp": datetime.now().strftime("%d %b"),
+                    "print": "",
+                    "date": d.strftime("%d %b %y"),
+                    "month": d.strftime("%y %m"),
+                    "account_name": "cash4",
+                    "item": "Sales",
+                    "category": "Sales Event",
+                    "folio": "",
+                    "note": "",
+                    "money_in": "",
+                    "money_out": "",
+                    "receipt": "",
+                    "status": acc,
+                    "job_num": job_num,
+                    "recipient_name": event_name,
+                    "tin_num": "",
+                    "username": username
+                }
+                rows.append(row)
+
+        df_new = pd.DataFrame(rows).fillna("")
+
+        # Check duplicates
+        if not df_existing.empty:
+            duplicate = df_existing[df_existing["job_num"] == job_num]
+            if not duplicate.empty:
+                st.error("Ledger for this job number already exists.")
                 st.stop()
 
-            if len(accounts) == 0:
-                st.warning("Select at least one account type")
-                st.stop()
+        # Append to Google Sheet
+        sheet.append_rows(df_new.values.tolist())
 
-            # Create date range
-            dates = pd.date_range(start_date, end_date)
-
-            rows = []
-            for d in dates:
-                for acc in accounts:
-                    row = {
-                        "Timestamp": datetime.now().strftime("%d %b"),
-                        "print": "",
-                        "date": d.strftime("%d %b %y"),
-                        "month": d.strftime("%y %m"),
-                        "account_name": "cash4",
-                        "item": "Sales",
-                        "category": "Sales Event",
-                        "folio": "",
-                        "note": "",
-                        "money_in": "",
-                        "money_out": "",
-                        "receipt": "",
-                        "status": acc,
-                        "job_num": job_num,
-                        "recipient_name": event_name,
-                        "tin_num": "",
-                        "username": username
-                    }
-                    rows.append(row)
-
-            df_new = pd.DataFrame(rows).fillna("")
-
-            # Check for duplicates
-            if not df_existing.empty:
-                duplicate = df_existing[df_existing["job_num"] == job_num]
-                if not duplicate.empty:
-                    st.error("Ledger for this job number already exists.")
-                    st.stop()
-
-            # Append to Google Sheet
-            sheet.append_rows(df_new.values.tolist())
-
-            st.success(f"{len(df_new)} rows successfully generated!")
-            st.dataframe(df_new)
-
-            # Hide form after generation (optional)
-            st.session_state.show_ledger_form = False
+        st.success(f"{len(df_new)} rows successfully generated!")
+        st.dataframe(df_new)
