@@ -233,7 +233,7 @@ calendar_event = calendar(
     options=calendar_options
 )
 
-
+selected_date = None
 if calendar_event and hasattr(calendar_event, "dateClick"):
     clicked = calendar_event.dateClick()  # call the method
     selected_date_str = clicked["date"]
