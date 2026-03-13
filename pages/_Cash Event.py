@@ -51,7 +51,7 @@ username = st.session_state.user
 @st.cache_data(ttl=60)
 def load_events():
 
-    url = f"https://docs.google.com/spreadsheets/d/{SHEET_ID}/gviz/tq?tqx=out:csv&sheet={EVENTLIST_SHEET}"
+    url = "https://docs.google.com/spreadsheets/d/1qw_0cW4ipW5eYh1_sqUyvZdIcjmYXLcsS4J6Y4NoU6A/edit?gid=635875008#gid=635875008"
 
     df = pd.read_csv(url)
 
