@@ -154,16 +154,6 @@ st.markdown("""
 
 
 
-calendar_options = {
-    "initialView": "dayGridMonth",
-    "height": 650,
-    "selectable": True
-}
-
-calendar_event = calendar(
-    events=events,
-    options=calendar_options
-)
 
 import urllib.parse
 
@@ -230,6 +220,18 @@ while current <= end_date:
     })
 
     current += timedelta(days=1)
+
+calendar_options = {
+    "initialView": "dayGridMonth",
+    "height": 650,
+    "selectable": True
+}
+
+calendar_event = calendar(
+    events=events,
+    options=calendar_options
+)
+
 
 if calendar_event and "dateClick" in calendar_event:
 
