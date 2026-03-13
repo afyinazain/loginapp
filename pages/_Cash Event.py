@@ -152,34 +152,7 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-events = []
 
-current = start_date
-
-while current <= end_date:
-
-    day_in = 0
-    day_out = 0
-
-    row = daily_cash[daily_cash["date"] == pd.to_datetime(current)]
-
-    if not row.empty:
-        day_in = float(row["total_in"].values[0])
-        day_out = float(row["total_out"].values[0])
-
-    title = f"{selected_event}"
-
-    if day_in > 0 or day_out > 0:
-        title += f"\n💰 {day_in:,.0f} | 💸 {day_out:,.0f}"
-
-    events.append({
-        "title": title,
-        "start": current.strftime("%Y-%m-%d"),
-        "end": current.strftime("%Y-%m-%d"),
-        "color": "#18c936"
-    })
-
-    current += timedelta(days=1)
 
 calendar_options = {
     "initialView": "dayGridMonth",
@@ -228,6 +201,35 @@ daily_cash = event_cash.groupby("date").agg(
     total_in=("money_in", "sum"),
     total_out=("money_out", "sum")
 ).reset_index()
+
+events = []
+
+current = start_date
+
+while current <= end_date:
+
+    day_in = 0
+    day_out = 0
+
+    row = daily_cash[daily_cash["date"] == pd.to_datetime(current)]
+
+    if not row.empty:
+        day_in = float(row["total_in"].values[0])
+        day_out = float(row["total_out"].values[0])
+
+    title = f"{selected_event}"
+
+    if day_in > 0 or day_out > 0:
+        title += f"\n💰 {day_in:,.0f} | 💸 {day_out:,.0f}"
+
+    events.append({
+        "title": title,
+        "start": current.strftime("%Y-%m-%d"),
+        "end": current.strftime("%Y-%m-%d"),
+        "color": "#18c936"
+    })
+
+    current += timedelta(days=1)
 
 if calendar_event and "dateClick" in calendar_event:
 
