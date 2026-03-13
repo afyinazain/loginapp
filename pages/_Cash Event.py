@@ -236,7 +236,7 @@ calendar_event = calendar(
 
 if calendar_event and "dateClick" in calendar_event:
 
-    selected_date_str = calendar_event["dateClick"]["date"]  # e.g. "2026-03-18"
+    selected_date_str = calendar_event.dateClick()["date"]  # e.g. "2026-03-18"
     selected_date = datetime.strptime(selected_date_str, "%Y-%m-%d").date()
 
     st.subheader(f"Transactions for {selected_date}")
