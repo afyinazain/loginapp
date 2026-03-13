@@ -1,10 +1,10 @@
 import streamlit as st
 import pandas as pd
 from datetime import datetime, timedelta
-from utils.sheets import read_sheet
 import gspread
 from google.oauth2.service_account import Credentials
 from streamlit_calendar import calendar
+import urllib.parse
 
 # -----------------------------
 # LOGIN CHECK
@@ -16,6 +16,8 @@ if "user" not in st.session_state or st.session_state.user is None:
 if st.session_state.user.get("role") != "admin":
     st.error("🚫 You do not have permission to access this page.")
     st.stop()
+
+username = st.session_state.user["username"]
 
 # -----------------------------
 # PAGE TITLE
@@ -38,16 +40,15 @@ creds = Credentials.from_service_account_info(
 client = gspread.authorize(creds)
 
 # -----------------------------
-# CONNECT TO GOOGLE SHEET
+# SHEET SETTINGS
 # -----------------------------
 SHEET_ID = "1qw_0cW4ipW5eYh1_sqUyvZdIcjmYXLcsS4J6Y4NoU6A"
 EVENTLIST_SHEET = "Event_List"
 CASHFLOW_SHEET = "Cashflow_Event"
-username = st.session_state.user["username"]
+
 # ---------------------------------
 # LOAD EVENT LIST
 # ---------------------------------
-
 @st.cache_data(ttl=60)
 def load_events():
 
@@ -63,9 +64,8 @@ def load_events():
 df_event = load_events()
 
 # ---------------------------------
-# REGISTER EVENT POPUP
+# REGISTER EVENT
 # ---------------------------------
-
 if st.button("➕ Register Event"):
 
     with st.form("register_event"):
@@ -73,7 +73,6 @@ if st.button("➕ Register Event"):
         st.subheader("Register New Event")
 
         event_name = st.text_input("Event Name")
-
         job_number = st.text_input("Job Number")
 
         event_type = st.selectbox(
@@ -82,7 +81,6 @@ if st.button("➕ Register Event"):
         )
 
         start_date = st.date_input("Start Date")
-
         end_date = st.date_input("End Date")
 
         duration = (end_date - start_date).days + 1
@@ -113,11 +111,12 @@ if st.button("➕ Register Event"):
             ])
 
             st.success("✅ Event Registered")
-
             st.cache_data.clear()
             st.rerun()
 
-
+# ---------------------------------
+# SELECT ACTIVE EVENT
+# ---------------------------------
 active_events = df_event[df_event["status"] == "active"]
 
 if active_events.empty:
@@ -129,44 +128,14 @@ selected_event = st.selectbox(
     active_events["event_name"].dropna().unique()
 )
 
-event_rows = active_events[active_events["event_name"] == selected_event]
-
-if event_rows.empty:
-    st.warning("Event not found.")
-    st.stop()
-
-event_row = event_rows.iloc[0]
+event_row = active_events[active_events["event_name"] == selected_event].iloc[0]
 
 start_date = event_row["start_date"]
 end_date = event_row["end_date"]
-job_number = event_row["job_number"] if "job_number" in event_row else ""
 
-st.markdown("""
-<style>
-
-.fc-event-title {
-    white-space: pre-line;
-    font-size: 11px;
-}
-
-</style>
-""", unsafe_allow_html=True)
-
-
-
-calendar_options = {
-    "initialView": "dayGridMonth",
-    "height": 650,
-    "selectable": True
-}
-
-calendar_event = calendar(
-    events=events,
-    options=calendar_options
-)
-
-import urllib.parse
-
+# ---------------------------------
+# LOAD CASHFLOW DATA
+# ---------------------------------
 @st.cache_data(ttl=60)
 def load_cashflow():
 
@@ -187,21 +156,21 @@ def load_cashflow():
 df_cash = load_cashflow()
 
 # ---------------------------------
-# FILTER CASHFLOW FOR SELECTED EVENT
+# FILTER CASHFLOW FOR EVENT
 # ---------------------------------
+event_cash = df_cash[df_cash["account_name"] == selected_event].copy()
 
-event_cash = df_cash[df_cash["account_name"] == selected_event]
-
-# Convert numeric columns safely
 event_cash["money_in"] = pd.to_numeric(event_cash["money_in"], errors="coerce").fillna(0)
 event_cash["money_out"] = pd.to_numeric(event_cash["money_out"], errors="coerce").fillna(0)
 
-# Group by date
 daily_cash = event_cash.groupby("date").agg(
     total_in=("money_in", "sum"),
     total_out=("money_out", "sum")
 ).reset_index()
 
+# ---------------------------------
+# BUILD CALENDAR EVENTS
+# ---------------------------------
 events = []
 
 current = start_date
@@ -231,13 +200,44 @@ while current <= end_date:
 
     current += timedelta(days=1)
 
+# ---------------------------------
+# CALENDAR STYLE
+# ---------------------------------
+st.markdown("""
+<style>
+.fc-event-title {
+    white-space: pre-line;
+    font-size: 11px;
+}
+</style>
+""", unsafe_allow_html=True)
+
+# ---------------------------------
+# SHOW CALENDAR
+# ---------------------------------
+calendar_options = {
+    "initialView": "dayGridMonth",
+    "height": 650,
+    "selectable": True
+}
+
+calendar_event = calendar(
+    events=events,
+    options=calendar_options
+)
+
+# ---------------------------------
+# DATE CLICK
+# ---------------------------------
+selected_date = None
+
 if calendar_event and "dateClick" in calendar_event:
-
     selected_date = calendar_event["dateClick"]["date"]
-
     st.subheader(f"Transactions for {selected_date}")
 
-
+# ---------------------------------
+# MONEY IN FORM
+# ---------------------------------
 st.markdown("### 💰 Money In")
 
 with st.form("money_in_form"):
@@ -257,17 +257,22 @@ with st.form("money_in_form"):
 
     submit_in = st.form_submit_button("Add Money In")
 
+# ---------------------------------
+# MONEY OUT FORM
+# ---------------------------------
 st.markdown("### 💸 Money Out")
 
 with st.form("money_out_form"):
 
     amount = st.number_input("Amount RM ", min_value=0.0)
 
-    item = st.selectbox("Expense Item",
+    item = st.selectbox(
+        "Expense Item",
         ["Purchase","Petrol","Diesel","Land Rental"]
     )
 
-    category = st.selectbox("Category",
+    category = st.selectbox(
+        "Category",
         ["Expense","Operational"]
     )
 
