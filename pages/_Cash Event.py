@@ -181,11 +181,7 @@ df_cash = load_cashflow()
 # ---------------------------------
 
 event_cash = df_cash[df_cash["account_name"] == selected_event].copy
-# Ensure df_cash["date"] is also date-only
-df_cash["date_only"] = df_cash["date"].dt.date
 
-# Filter for clicked date
-transactions = df_cash[df_cash["date_only"] == selected_date]
 
 # Convert numeric columns safely
 event_cash["money_in"] = pd.to_numeric(event_cash["money_in"], errors="coerce").fillna(0)
@@ -245,6 +241,11 @@ if calendar_event and "dateClick" in calendar_event:
 
     st.subheader(f"Transactions for {selected_date}")
 
+# Ensure df_cash["date"] is also date-only
+df_cash["date_only"] = df_cash["date"].dt.date
+
+# Filter for clicked date
+transactions = df_cash[df_cash["date_only"] == selected_date]
 
 st.markdown("### 💰 Money In")
 
