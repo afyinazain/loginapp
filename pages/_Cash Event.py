@@ -167,8 +167,14 @@ def load_cashflow():
     df1 = pd.read_csv(url1, header=2)
 
     df1.columns = df1.columns.str.strip()
+    
+    
+    # Remove completely unnamed columns
+    df1 = df1.loc[:, ~df1.columns.str.contains('^Unnamed')]
+    
+    # Drop fully empty rows
+    df1 = df1.dropna(how='all')
     st.write(df1.columns.tolist())
-
     if "date" in df1.columns:
         df1["date"] = pd.to_datetime(df1["date"], errors="coerce")
 
