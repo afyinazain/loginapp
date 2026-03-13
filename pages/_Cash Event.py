@@ -53,7 +53,7 @@ def load_events():
 
     url = f"https://docs.google.com/spreadsheets/d/{SHEET_ID}/gviz/tq?tqx=out:csv&sheet={EVENTLIST_SHEET}"
     df = pd.read_csv(url)
-    st.write(df.columns.tolist())
+    
     df["start_date"] = pd.to_datetime(df["start_date"], errors="coerce")
     df["end_date"] = pd.to_datetime(df["end_date"], errors="coerce")
 
@@ -167,11 +167,7 @@ def load_cashflow():
     df1 = pd.read_csv(url1)
 
     df1.columns = df1.columns.str.strip()
-    
-    
-
-
-    st.write(df1.columns.tolist())
+   
     if "date" in df1.columns:
         df1["date"] = pd.to_datetime(df1["date"], errors="coerce")
 
