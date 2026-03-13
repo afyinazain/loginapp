@@ -167,6 +167,7 @@ def load_cashflow():
     df1 = pd.read_csv(url1, header=4)
 
     df1.columns = df1.columns.str.strip()
+    st.write(df1.columns.tolist())
 
     if "date" in df1.columns:
         df1["date"] = pd.to_datetime(df1["date"], errors="coerce")
@@ -180,7 +181,7 @@ df_cash = load_cashflow()
 # FILTER CASHFLOW FOR SELECTED EVENT
 # ---------------------------------
 
-event_cash = df_cash[df_cash["account_name"] == selected_event]
+event_cash = df_cash[df_cash["account_name"] == selected_event].copy()
 
 # Convert numeric columns safely
 event_cash["money_in"] = pd.to_numeric(event_cash["money_in"], errors="coerce").fillna(0)
