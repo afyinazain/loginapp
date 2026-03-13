@@ -179,7 +179,6 @@ def order_popup():
     placeholder="Choose available item"
     )    
 
-    item_1 = st.text_input("Item 1 (untuk item SELAIN rental)")
     nama_pelanggan = st.text_input("Nama Penuh Pelanggan")
     delivery_date = selected_date
     expiry_date = datetime.today() + timedelta(days=5)
@@ -390,6 +389,7 @@ for branch in active_branch_list:
         st.write(", ".join(available) if available else "—")
 
         
+
 
 
 
