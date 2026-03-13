@@ -62,20 +62,6 @@ def load_events():
 
 df_event = load_events()
 
-@st.cache_data(ttl=60)
-def load_cashflow():
-
-    url1 = f"https://docs.google.com/spreadsheets/d/{SHEET_ID}/gviz/tq?tqx=out:csv&sheet={CASHFLOW_SHEET}"
-
-    df1 = pd.read_csv(url1)
-
-    if "date" in df1.columns:
-        df1["date"] = pd.to_datetime(df1["date"])
-
-    return df1
-
-df_cashflow = load_cashflow()
-
 # ---------------------------------
 # REGISTER EVENT POPUP
 # ---------------------------------
@@ -184,7 +170,7 @@ calendar_event = calendar(
 @st.cache_data(ttl=60)
 def load_cashflow():
 
-    url = f"https://docs.google.com/spreadsheets/d/{SPREADSHEET_ID}/gviz/tq?tqx=out:csv&sheet={CASHFLOW_SHEET}"
+    url = f"https://docs.google.com/spreadsheets/d/{SHEET_ID}/gviz/tq?tqx=out:csv&sheet={CASHFLOW_SHEET}"
 
     df = pd.read_csv(url)
 
