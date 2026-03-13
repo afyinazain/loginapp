@@ -172,7 +172,7 @@ def load_cashflow():
 
     url = f"https://docs.google.com/spreadsheets/d/{SHEET_ID}/gviz/tq?tqx=out:csv&sheet={CASHFLOW_SHEET}"
 
-    df = pd.read_csv(url)
+    df = pd.read_csv(url,header=4)
 
     df["date"] = pd.to_datetime(df["date"])
 
