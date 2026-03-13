@@ -69,7 +69,7 @@ def load_cashflow():
 
     df1 = pd.read_csv(url1)
 
-    if "date" in df.columns:
+    if "date" in df1.columns:
         df1["date"] = pd.to_datetime(df1["date"])
 
     return df1
