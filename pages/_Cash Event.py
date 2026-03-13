@@ -42,7 +42,7 @@ client = gspread.authorize(creds)
 # -----------------------------
 SHEET_ID = "1qw_0cW4ipW5eYh1_sqUyvZdIcjmYXLcsS4J6Y4NoU6A"
 EVENTLIST_SHEET = "Event_List"
-CASHFLOW_SHEET = "Cashflow_Event"
+CASHFLOW_SHEET = "Event_Cashflow"
 username = st.session_state.user["username"]
 # ---------------------------------
 # LOAD EVENT LIST
