@@ -180,7 +180,7 @@ df_cash = load_cashflow()
 # FILTER CASHFLOW FOR SELECTED EVENT
 # ---------------------------------
 
-event_cash = df_cash[df_cash["account_name"] == selected_event].copy
+event_cash = df_cash[df_cash["account_name"] == selected_event].copy()
 
 
 # Convert numeric columns safely
@@ -234,57 +234,56 @@ calendar_event = calendar(
 )
 
 
-if calendar_event and "dateClick" in calendar_event:
-
-    selected_date_str = calendar_event.dateClick()["date"]  # e.g. "2026-03-18"
+if calendar_event and hasattr(calendar_event, "dateClick"):
+    clicked = calendar_event.dateClick()  # call the method
+    selected_date_str = clicked["date"]
     selected_date = datetime.strptime(selected_date_str, "%Y-%m-%d").date()
 
-    st.subheader(f"Transactions for {selected_date}")
 
-# Ensure df_cash["date"] is also date-only
-df_cash["date_only"] = df_cash["date"].dt.date
+df_cash["date_only"] = pd.to_datetime(df_cash["date"]).dt.date
 
-# Filter for clicked date
 transactions = df_cash[df_cash["date_only"] == selected_date]
 
-st.markdown("### 💰 Money In")
+if selected_date:
+    st.subheader(f"Transactions for {selected_date}")
+    st.markdown("### 💰 Money In")
+    
+    with st.form("money_in_form"):
 
-with st.form("money_in_form"):
+        amount = st.number_input("Amount RM", min_value=0.0)
 
-    amount = st.number_input("Amount RM", min_value=0.0)
+        item = st.selectbox("Item", ["Ticket Sales", "Petty Cash", "Other"])
 
-    item = st.selectbox("Item", ["Ticket Sales", "Petty Cash", "Other"])
+        category = st.selectbox("Category", ["Sales", "Cash Injection"])
 
-    category = st.selectbox("Category", ["Sales", "Cash Injection"])
+        account = st.selectbox(
+            "Account Type",
+            ["CASH", "QR BANK", "TNG", "BNK1", "BNK2", "BNK3"]
+        )
 
-    account = st.selectbox(
-        "Account Type",
-        ["CASH", "QR BANK", "TNG", "BNK1", "BNK2", "BNK3"]
-    )
+        receipt = st.file_uploader("Upload Receipt")
 
-    receipt = st.file_uploader("Upload Receipt")
+        submit_in = st.form_submit_button("Add Money In")
 
-    submit_in = st.form_submit_button("Add Money In")
+    st.markdown("### 💸 Money Out")
+    
+    with st.form("money_out_form"):
 
-st.markdown("### 💸 Money Out")
+        amount = st.number_input("Amount RM ", min_value=0.0)
 
-with st.form("money_out_form"):
+        item = st.selectbox("Expense Item",
+            ["Purchase","Petrol","Diesel","Land Rental"]
+        )
 
-    amount = st.number_input("Amount RM ", min_value=0.0)
+        category = st.selectbox("Category",
+            ["Expense","Operational"]
+        )
 
-    item = st.selectbox("Expense Item",
-        ["Purchase","Petrol","Diesel","Land Rental"]
-    )
+        account = st.selectbox(
+            "Account Type",
+            ["CASH","QR BANK","TNG","BNK1","BNK2","BNK3"]
+        )
 
-    category = st.selectbox("Category",
-        ["Expense","Operational"]
-    )
+        receipt = st.file_uploader("Receipt")
 
-    account = st.selectbox(
-        "Account Type",
-        ["CASH","QR BANK","TNG","BNK1","BNK2","BNK3"]
-    )
-
-    receipt = st.file_uploader("Receipt")
-
-    submit_out = st.form_submit_button("Add Money Out")
+        submit_out = st.form_submit_button("Add Money Out")
