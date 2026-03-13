@@ -134,12 +134,22 @@ if st.button("➕ Register Event"):
 
 active_events = df_event[df_event["status"] == "active"]
 
+if active_events.empty:
+    st.info("No active events found. Please register an event first.")
+    st.stop()
+
 selected_event = st.selectbox(
     "Select Event",
-    active_events["event_name"].unique()
+    active_events["event_name"].dropna().unique()
 )
 
-event_row = active_events[active_events["event_name"] == selected_event].iloc[0]
+event_rows = active_events[active_events["event_name"] == selected_event]
+
+if event_rows.empty:
+    st.warning("Event not found.")
+    st.stop()
+
+event_row = event_rows.iloc[0]
 
 start_date = event_row["start_date"]
 end_date = event_row["end_date"]
