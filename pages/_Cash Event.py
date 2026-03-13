@@ -1,6 +1,6 @@
 import streamlit as st
 import pandas as pd
-from datetime import datetime
+from datetime import datetime, timedelta
 from utils.sheets import read_sheet
 import gspread
 from google.oauth2.service_account import Credentials
@@ -43,7 +43,7 @@ client = gspread.authorize(creds)
 SHEET_ID = "1qw_0cW4ipW5eYh1_sqUyvZdIcjmYXLcsS4J6Y4NoU6A"
 EVENTLIST_SHEET = "Event List"
 CASHFLOW_SHEET = "Cashflow Event"
-username = st.session_state.user
+username = st.session_state.user["username"]
 # ---------------------------------
 # LOAD EVENT LIST
 # ---------------------------------
@@ -51,8 +51,7 @@ username = st.session_state.user
 @st.cache_data(ttl=60)
 def load_events():
 
-    url = "https://docs.google.com/spreadsheets/d/1qw_0cW4ipW5eYh1_sqUyvZdIcjmYXLcsS4J6Y4NoU6A/edit?gid=635875008#gid=635875008"
-
+    url = f"https://docs.google.com/spreadsheets/d/{SHEET_ID}/gviz/tq?tqx=out:csv&sheet={EVENTLIST_SHEET}"
     df = pd.read_csv(url)
 
     df["start_date"] = pd.to_datetime(df["start_date"])
@@ -62,6 +61,20 @@ def load_events():
 
 
 df_event = load_events()
+
+@st.cache_data(ttl=60)
+def load_cashflow():
+
+    url1 = f"https://docs.google.com/spreadsheets/d/{SHEET_ID}/gviz/tq?tqx=out:csv&sheet={CASHFLOW_SHEET}"
+
+    df1 = pd.read_csv(url1)
+
+    if "date" in df.columns:
+        df1["date"] = pd.to_datetime(df1["date"])
+
+    return df1
+
+df_cashflow = load_cashflow()
 
 # ---------------------------------
 # REGISTER EVENT POPUP
@@ -99,23 +112,24 @@ if st.button("➕ Register Event"):
 
             timestamp = datetime.now()
 
-            new_row = pd.DataFrame([{
+            sheet = client.open_by_key(SHEET_ID).worksheet(EVENTLIST_SHEET)
 
-                "timestamp": timestamp,
-                "pic": username,
-                "event_name": event_name,
-                "event_type": event_type,
-                "start_date": start_date,
-                "end_date": end_date,
-                "duration": duration,
-                "account_type": ",".join(account_type),
-                "status": "active"
+            sheet.append_row([
+                timestamp.strftime("%Y-%m-%d %H:%M:%S"),
+                username,
+                event_name,
+                event_type,
+                start_date.strftime("%Y-%m-%d"),
+                end_date.strftime("%Y-%m-%d"),
+                duration,
+                ",".join(account_type),
+                "active"
+            ])
 
-            }])
+            st.success("✅ Event Registered")
 
-            st.success("Event Registered")
-
-            # HERE you will append to sheet using your Google API method
+            st.cache_data.clear()
+            st.rerun()
 
 
 active_events = df_event[df_event["status"] == "active"]
@@ -148,7 +162,8 @@ while current <= end_date:
 
 calendar_options = {
     "initialView": "dayGridMonth",
-    "height": 650
+    "height": 650,
+    "selectable": True
 }
 
 calendar_event = calendar(
