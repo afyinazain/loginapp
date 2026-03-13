@@ -141,14 +141,39 @@ start_date = event_row["start_date"]
 end_date = event_row["end_date"]
 job_number = event_row["job_number"] if "job_number" in event_row else ""
 
+st.markdown("""
+<style>
+
+.fc-event-title {
+    white-space: pre-line;
+    font-size: 11px;
+}
+
+</style>
+""", unsafe_allow_html=True)
+
 events = []
 
 current = start_date
 
 while current <= end_date:
 
+    day_in = 0
+    day_out = 0
+
+    row = daily_cash[daily_cash["date"] == pd.to_datetime(current)]
+
+    if not row.empty:
+        day_in = float(row["total_in"].values[0])
+        day_out = float(row["total_out"].values[0])
+
+    title = f"{selected_event}"
+
+    if day_in > 0 or day_out > 0:
+        title += f"\n💰 {day_in:,.0f} | 💸 {day_out:,.0f}"
+
     events.append({
-        "title": selected_event,
+        "title": title,
         "start": current.strftime("%Y-%m-%d"),
         "end": current.strftime("%Y-%m-%d"),
         "color": "#18c936"
@@ -187,6 +212,22 @@ def load_cashflow():
 
 
 df_cash = load_cashflow()
+
+# ---------------------------------
+# FILTER CASHFLOW FOR SELECTED EVENT
+# ---------------------------------
+
+event_cash = df_cash[df_cash["account_name"] == selected_event]
+
+# Convert numeric columns safely
+event_cash["money_in"] = pd.to_numeric(event_cash["money_in"], errors="coerce").fillna(0)
+event_cash["money_out"] = pd.to_numeric(event_cash["money_out"], errors="coerce").fillna(0)
+
+# Group by date
+daily_cash = event_cash.groupby("date").agg(
+    total_in=("money_in", "sum"),
+    total_out=("money_out", "sum")
+).reset_index()
 
 if calendar_event and "dateClick" in calendar_event:
 
