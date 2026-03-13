@@ -164,7 +164,7 @@ def load_cashflow():
 
     url1 = f"https://docs.google.com/spreadsheets/d/{SHEET_ID}/gviz/tq?tqx=out:csv&sheet={sheet_name}"
 
-    df1 = pd.read_csv(url1, header=4)
+    df1 = pd.read_csv(url1, header=1)
 
     df1.columns = df1.columns.str.strip()
     st.write(df1.columns.tolist())
