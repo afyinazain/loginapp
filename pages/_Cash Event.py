@@ -116,3 +116,105 @@ if st.button("➕ Register Event"):
             st.success("Event Registered")
 
             # HERE you will append to sheet using your Google API method
+
+
+active_events = df_event[df_event["status"] == "active"]
+
+selected_event = st.selectbox(
+    "Select Event",
+    active_events["event_name"].unique()
+)
+
+event_row = active_events[active_events["event_name"] == selected_event].iloc[0]
+
+start_date = event_row["start_date"]
+end_date = event_row["end_date"]
+job_number = event_row["job_number"] if "job_number" in event_row else ""
+
+events = []
+
+current = start_date
+
+while current <= end_date:
+
+    events.append({
+        "title": selected_event,
+        "start": current.strftime("%Y-%m-%d"),
+        "end": current.strftime("%Y-%m-%d"),
+        "color": "#18c936"
+    })
+
+    current += timedelta(days=1)
+
+calendar_options = {
+    "initialView": "dayGridMonth",
+    "height": 650
+}
+
+calendar_event = calendar(
+    events=events,
+    options=calendar_options
+)
+
+@st.cache_data(ttl=60)
+def load_cashflow():
+
+    url = f"https://docs.google.com/spreadsheets/d/{SPREADSHEET_ID}/gviz/tq?tqx=out:csv&sheet={CASHFLOW_SHEET}"
+
+    df = pd.read_csv(url)
+
+    df["date"] = pd.to_datetime(df["date"])
+
+    return df
+
+
+df_cash = load_cashflow()
+
+if calendar_event and "dateClick" in calendar_event:
+
+    selected_date = calendar_event["dateClick"]["date"]
+
+    st.subheader(f"Transactions for {selected_date}")
+
+
+st.markdown("### 💰 Money In")
+
+with st.form("money_in_form"):
+
+    amount = st.number_input("Amount RM", min_value=0.0)
+
+    item = st.selectbox("Item", ["Ticket Sales", "Petty Cash", "Other"])
+
+    category = st.selectbox("Category", ["Sales", "Cash Injection"])
+
+    account = st.selectbox(
+        "Account Type",
+        ["CASH", "QR BANK", "TNG", "BNK1", "BNK2", "BNK3"]
+    )
+
+    receipt = st.file_uploader("Upload Receipt")
+
+    submit_in = st.form_submit_button("Add Money In")
+
+st.markdown("### 💸 Money Out")
+
+with st.form("money_out_form"):
+
+    amount = st.number_input("Amount RM ", min_value=0.0)
+
+    item = st.selectbox("Expense Item",
+        ["Purchase","Petrol","Diesel","Land Rental"]
+    )
+
+    category = st.selectbox("Category",
+        ["Expense","Operational"]
+    )
+
+    account = st.selectbox(
+        "Account Type",
+        ["CASH","QR BANK","TNG","BNK1","BNK2","BNK3"]
+    )
+
+    receipt = st.file_uploader("Receipt")
+
+    submit_out = st.form_submit_button("Add Money Out")
