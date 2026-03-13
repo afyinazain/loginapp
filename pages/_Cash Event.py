@@ -167,14 +167,21 @@ calendar_event = calendar(
     options=calendar_options
 )
 
+import urllib.parse
+
 @st.cache_data(ttl=60)
 def load_cashflow():
 
-    url = f"https://docs.google.com/spreadsheets/d/{SHEET_ID}/gviz/tq?tqx=out:csv&sheet={CASHFLOW_SHEET}"
+    sheet_name = urllib.parse.quote(CASHFLOW_SHEET)
 
-    df = pd.read_csv(url,header=4)
+    url = f"https://docs.google.com/spreadsheets/d/{SHEET_ID}/gviz/tq?tqx=out:csv&sheet={sheet_name}"
 
-    df["date"] = pd.to_datetime(df["date"])
+    df = pd.read_csv(url, header=4)
+
+    df.columns = df.columns.str.strip()
+
+    if "date" in df.columns:
+        df["date"] = pd.to_datetime(df["date"], errors="coerce")
 
     return df
 
