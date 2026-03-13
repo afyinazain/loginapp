@@ -162,16 +162,16 @@ def load_cashflow():
 
     sheet_name = urllib.parse.quote(CASHFLOW_SHEET)
 
-    url = f"https://docs.google.com/spreadsheets/d/{SHEET_ID}/gviz/tq?tqx=out:csv&sheet={sheet_name}"
+    url1 = f"https://docs.google.com/spreadsheets/d/{SHEET_ID}/gviz/tq?tqx=out:csv&sheet={sheet_name}"
 
-    df = pd.read_csv(url, header=4)
+    df1 = pd.read_csv(url, header=4)
 
-    df.columns = df.columns.str.strip()
+    df1.columns = df1.columns.str.strip()
 
-    if "date" in df.columns:
-        df["date"] = pd.to_datetime(df["date"], errors="coerce")
+    if "date" in df1.columns:
+        df1["date"] = pd.to_datetime(df1["date"], errors="coerce")
 
-    return df
+    return df1
 
 
 df_cash = load_cashflow()
