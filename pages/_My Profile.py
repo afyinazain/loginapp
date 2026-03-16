@@ -342,7 +342,7 @@ df_inv["delivery_date_str"] = df_inv["delivery_date"].dt.strftime("%d-%b-%Y")
 
 for _, row in pending_payment.iterrows():
     
-    with st.expander(f"Pending Payment: RM {float(row['lookup_pivot3']):.2f}"):
+    with st.expander(f"Pending Payment: RM {float(row['outstanding_payment']):.2f}"):
         st.write(f"{row['item_1']} {row['bil_jam']} | {row['nama_tempat']} | {row['delivery_date'].strftime("%d-%b-%Y")}")
         st.write(f"Branch: {row['branch']}")
         st.write(f"Invoice: {row['invoice_num']}")
