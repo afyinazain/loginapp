@@ -1,6 +1,5 @@
 [server]
 headless = true
-port = $PORT
 enableCORS = false
 [google_service_account]
 type = "service_account"
