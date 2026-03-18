@@ -4,6 +4,18 @@ from google.oauth2.service_account import Credentials
 from datetime import timedelta, datetime, date
 import re
 
+import os
+import json
+
+# Google Service Account
+google_creds = {
+    "type": "service_account",
+    "project_id": os.getenv("GOOGLE_PROJECT_ID"),
+    "client_email": os.getenv("GOOGLE_CLIENT_EMAIL"),
+    "private_key": os.getenv("GOOGLE_PRIVATE_KEY").replace("\\n", "\n"),
+}
+
+
 # -----------------------------
 # SCOPES for Google Sheets & Drive
 # -----------------------------
@@ -15,20 +27,33 @@ SCOPES = [
 # -----------------------------
 # Helper function: authorize client
 # -----------------------------
+
 def get_client():
     """
-    Returns a gspread client authorized via Streamlit secrets.
+    Returns a gspread client authorized via Railway environment variables.
     """
-    creds = Credentials.from_service_account_info(
-        st.secrets["google_service_account"],  # your JSON content stored in Streamlit secrets
-        scopes=SCOPES
-    )
+    # Reconstruct the service account JSON from environment variables
+    service_account_info = {
+        "type": "service_account",
+        "project_id": os.getenv("GOOGLE_PROJECT_ID"),
+        "private_key_id": os.getenv("GOOGLE_PRIVATE_KEY_ID", ""),
+        "private_key": os.getenv("GOOGLE_PRIVATE_KEY").replace("\\n", "\n"),
+        "client_email": os.getenv("GOOGLE_CLIENT_EMAIL"),
+        "client_id": os.getenv("GOOGLE_CLIENT_ID", ""),
+        "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+        "token_uri": "https://oauth2.googleapis.com/token",
+        "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+        "client_x509_cert_url": os.getenv("GOOGLE_CLIENT_X509_CERT_URL", "")
+    }
+
+    creds = Credentials.from_service_account_info(service_account_info, scopes=SCOPES)
     client = gspread.authorize(creds)
     return client
-
+    
 # -----------------------------
 # Append a row to a sheet
 # -----------------------------
+
 def append_row_by_header(sheet_id: str, sheet_name: str, data: dict, header_row: int = 1):
     """
     Append a row to a Google Sheet tab.
@@ -189,11 +214,13 @@ def generate_invoice_number(df):
 import cloudinary
 import cloudinary.uploader
 
-cloudinary.config(
-    cloud_name="dbxmliyzr",
-    api_key="157236951965868",
-    api_secret="4_GPqScoK-9rup4Eb_GS1fbxgjs"
-)
+# Cloudinary
+cloudinary_config = {
+    "cloud_name": os.getenv("CLOUDINARY_CLOUD_NAME"),
+    "api_key": os.getenv("CLOUDINARY_API_KEY"),
+    "api_secret": os.getenv("CLOUDINARY_API_SECRET"),
+}
+
 
 def upload_to_cloudinary(file, file_name):
     result = cloudinary.uploader.upload(
