@@ -17,6 +17,24 @@ if st.session_state.user.get("role") != "admin":
     st.error("🚫 You do not have permission to access this page.")
     st.stop()
 
+import os
+import json
+
+# Google Service Account
+google_creds = {
+    "type": "service_account",
+    "project_id": os.getenv("GOOGLE_PROJECT_ID"),
+    "client_email": os.getenv("GOOGLE_CLIENT_EMAIL"),
+    "private_key": os.getenv("GOOGLE_PRIVATE_KEY").replace("\\n", "\n"),
+}
+
+# Cloudinary
+cloudinary_config = {
+    "cloud_name": os.getenv("CLOUDINARY_CLOUD_NAME"),
+    "api_key": os.getenv("CLOUDINARY_API_KEY"),
+    "api_secret": os.getenv("CLOUDINARY_API_SECRET"),
+}
+
 # -----------------------------
 # PAGE TITLE
 # -----------------------------
