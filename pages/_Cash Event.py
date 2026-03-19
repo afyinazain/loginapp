@@ -40,7 +40,7 @@ ACCOUNT_SHEET = "Event_Account"
 # -----------------------------
 # REGISTER EVENT FORM
 # -----------------------------
-if st.button("➕ Register New Event")
+if st.button("➕ Register New Event"):
 
     with st.form("register_event_form"):
         st.subheader("Register New Event")
@@ -84,20 +84,26 @@ if st.button("➕ Register New Event")
                 st.experimental_rerun()
 
 
-
-
 # -----------------------------
-# SELECT EVENT
+# LOAD EVENTS
 # -----------------------------
+df_events = pd.DataFrame(read_sheet(SHEET_ID, EVENTS_SHEET))
+
+# Filter active events
 active_events = df_events[df_events["status"] == "active"]
 
 if active_events.empty:
     st.info("No active events")
     st.stop()
 
+# -----------------------------
+# SELECT EVENT
+# -----------------------------
+
+
 selected_event = st.selectbox(
     "Select Event",
-    active_events["event_name"],
+    active_events["event_name"].tolist(),
     key="active_event"
 )
 
