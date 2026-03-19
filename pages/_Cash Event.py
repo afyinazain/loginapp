@@ -5,7 +5,8 @@ from utils.sheets import read_sheet, get_client
 import os
 import json
 from streamlit_calendar import calendar
-
+import urllib.parse
+import uuid
 # -----------------------------
 # LOGIN CHECK
 # -----------------------------
