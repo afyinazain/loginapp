@@ -75,7 +75,75 @@ df_events = load_sheet(EVENTLIST_SHEET)
 df_accounts = load_sheet(ACCOUNT_SHEET)
 df_txn = load_sheet(TXN_SHEET)
 
+if st.button("➕ Register Event"):
+    st.session_state.show_event_form = True
 
+
+# -----------------------------
+# EVENT FORM
+# -----------------------------
+if st.session_state.get("show_event_form", False):
+
+    with st.form("event_form"):
+
+        st.subheader("Register New Event")
+
+        event_name = st.text_input("Event Name")
+
+        job_number = st.text_input("Job Number")
+
+        event_type = st.selectbox(
+            "Event Type",
+            ["FUN FEST", "MEGA ARENA"],
+            key="event_type"
+        )
+
+        start_date = st.date_input("Start Date")
+
+        end_date = st.date_input("End Date")
+
+        submit = st.form_submit_button("Save Event")
+
+        if submit:
+
+            duration = (end_date - start_date).days + 1
+
+            timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+            event_id = "EVT" + datetime.now().strftime("%Y%m%d%H%M%S")
+
+            # Connect to sheet
+            sheet = client.open_by_key(SHEET_ID).worksheet(SHEET_NAME)
+
+            # Get headers from row 1
+            headers = sheet.row_values(1)
+
+            # Create dictionary mapped to headers
+            row_data = {
+                "event_id": event_id,
+                "timestamp": timestamp,
+                "username": username,
+                "event_name": event_name,
+                "job_number": job_number,
+                "event_type": event_type,
+                "start_date": start_date.strftime("%Y-%m-%d"),
+                "end_date": end_date.strftime("%Y-%m-%d"),
+                "duration": duration,
+                "status": "active"
+            }
+
+            # Reorder according to sheet headers
+            row = [row_data.get(col, "") for col in headers]
+
+            # Append row
+            sheet.append_row(row, value_input_option="USER_ENTERED")
+
+            st.success("✅ Event Registered")
+
+            st.session_state.show_event_form = False
+
+            st.rerun()
+            
 # -----------------------------
 # SELECT EVENT
 # -----------------------------
