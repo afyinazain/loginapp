@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 from datetime import datetime, timedelta
-from utils.sheets import read_sheet, get_client
+from utils.sheets import read_sheet, get_client, append_row_by_header
 import os
 import json
 from streamlit_calendar import calendar
@@ -47,104 +47,61 @@ st.title("🎪 Event Cash Flow Management")
 # -----------------------------
 
 SHEET_ID = "1qw_0cW4ipW5eYh1_sqUyvZdIcjmYXLcsS4J6Y4NoU6A"
-EVENTLIST_SHEET = "Event_List"
+EVENTS_SHEET = "Event_List"
 TXN_SHEET = "Event_Txn"
 ACCOUNT_SHEET = "Event_Account"
 
-
-
-# ---------------------------------
-# LOAD EVENT LIST
-# ---------------------------------
-
 @st.cache_data(ttl=60)
 
-def load_sheet(sheet):
-    
-    sheet = urllib.parse.quote(sheet)
-
-    url = f"https://docs.google.com/spreadsheets/d/{SHEET_ID}/gviz/tq?tqx=out:csv&sheet={sheet}"
-
-    df = pd.read_csv(url)
-
-    df.columns = df.columns.str.strip()
-
-    return df
-    
-df_events = load_sheet(EVENTLIST_SHEET)
-df_accounts = load_sheet(ACCOUNT_SHEET)
-df_txn = load_sheet(TXN_SHEET)
-
-if st.button("➕ Register Event"):
-    st.session_state.show_event_form = True
-
-
 # -----------------------------
-# EVENT FORM
+# REGISTER EVENT FORM
 # -----------------------------
-if st.session_state.get("show_event_form", False):
+st.header("➕ Register New Event")
 
-    with st.form("event_form"):
-        username = st.session_state.user["username"]
-        
-        st.subheader("Register New Event")
+with st.form("register_event_form"):
+    st.subheader("Register New Event")
+    event_name = st.text_input("Event Name")
+    job_number = st.text_input("Job Number")
+    event_type = st.selectbox("Event Type", ["MEGA ARENA", "FUN FEST"])
+    start_date = st.date_input("Start Date")
+    end_date = st.date_input("End Date")
+    account_types = st.multiselect("Account Types", ["CASH", "QR BANK", "TNG", "BNK1", "BNK2", "BNK3"])
+    username = st.session_state.user["username"]
+    
+    submit = st.form_submit_button("Save Event")
 
-        event_name = st.text_input("Event Name")
-
-        job_number = st.text_input("Job Number")
-
-        event_type = st.selectbox(
-            "Event Type",
-            ["FUN FEST", "MEGA ARENA"],
-            key="event_type"
-        )
-
-        start_date = st.date_input("Start Date")
-
-        end_date = st.date_input("End Date")
-
-        submit = st.form_submit_button("Save Event")
-
-        if submit:
-
+    if submit:
+        if not event_name or not account_types:
+            st.warning("Please fill all required fields and select at least one account type.")
+        else:
             duration = (end_date - start_date).days + 1
-
-            timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-
             event_id = "EVT" + datetime.now().strftime("%Y%m%d%H%M%S")
-
-            # Connect to sheet
-            sheet = client.open_by_key(SHEET_ID).worksheet(EVENTLIST_SHEET)
-
-            # Get headers from row 1
-            headers = sheet.row_values(1)
-
-            # Create dictionary mapped to headers
-            row_data = {
+            # Prepare data dict based on your sheet headers
+            data = {
                 "event_id": event_id,
-                "timestamp": timestamp,
+                "timestamp": datetime.now(),
                 "created_by": username,
                 "event_name": event_name,
                 "job_number": job_number,
                 "event_type": event_type,
-                "start_date": start_date.strftime("%Y-%m-%d"),
-                "end_date": end_date.strftime("%Y-%m-%d"),
+                "start_date": start_date,
+                "end_date": end_date,
                 "duration": duration,
+                "account_types": ",".join(account_types),
                 "status": "active"
             }
 
-            # Reorder according to sheet headers
-            row = [row_data.get(col, "") for col in headers]
+            # Append using header-aware function
+            append_row_by_header(SHEET_ID, EVENT_SHEET, data)
 
-            # Append row
-            sheet.append_row(row, value_input_option="USER_ENTERED")
+            st.success(f"✅ Event '{event_name}' registered successfully!")
 
-            st.success("✅ Event Registered")
+            # Optionally, reload active events if needed
+            st.experimental_rerun()
 
-            st.session_state.show_event_form = False
 
-            st.rerun()
-            
+
+
 # -----------------------------
 # SELECT EVENT
 # -----------------------------
@@ -156,10 +113,10 @@ if active_events.empty:
 
 selected_event = st.selectbox(
     "Select Event",
-    active_events["event_name"]
+    active_events["event_name"],
+    key="active_event"
 )
 
-print(active_events["event_name"])
 
 event_row = active_events[
     active_events["event_name"] == selected_event
