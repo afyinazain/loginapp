@@ -1,9 +1,8 @@
 import streamlit as st
 import pandas as pd
 from datetime import datetime, timedelta
-from utils.sheets import read_sheet
-import gspread
-from google.oauth2.service_account import Credentials
+from utils.sheets import read_sheet, get_client
+client = get_client()
 from streamlit_calendar import calendar
 
 # -----------------------------
@@ -40,20 +39,6 @@ cloudinary_config = {
 # -----------------------------
 st.title("🎪 Event Cash Flow Management")
 
-# -----------------------------
-# GOOGLE AUTH
-# -----------------------------
-scope = [
-    "https://www.googleapis.com/auth/spreadsheets",
-    "https://www.googleapis.com/auth/drive"
-]
-
-creds = Credentials.from_service_account_info(
-    st.secrets["google_service_account"],
-    scopes=scope
-)
-
-client = gspread.authorize(creds)
 
 # -----------------------------
 # CONNECT TO GOOGLE SHEET
