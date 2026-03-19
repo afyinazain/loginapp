@@ -76,7 +76,22 @@ if st.button("➕ Register New Event"):
                 }
 
                 # Append using header-aware function
-                append_row_by_header(SHEET_ID, EVENTS_SHEET, data)
+                append_row_by_header(sheet_id=SHEET_ID, sheet_name=EVENTS_SHEET,
+                    data = {
+                    "event_id": event_id,
+                    "timestamp": datetime.now(),
+                    "created_by": username,
+                    "event_name": event_name,
+                    "job_number": job_number,
+                    "event_type": event_type,
+                    "start_date": start_date,
+                    "end_date": end_date,
+                    "duration": duration,
+                    "account_types": ",".join(account_types),
+                    "status": "active"
+                },
+                    header_row=1
+                )
 
                 st.success(f"✅ Event '{event_name}' registered successfully!")
 
