@@ -42,48 +42,48 @@ ACCOUNT_SHEET = "Event_Account"
 # -----------------------------
 # REGISTER EVENT FORM
 # -----------------------------
-st.header("➕ Register New Event")
+if st.button("➕ Register New Event")
 
-with st.form("register_event_form"):
-    st.subheader("Register New Event")
-    event_name = st.text_input("Event Name")
-    job_number = st.text_input("Job Number")
-    event_type = st.selectbox("Event Type", ["MEGA ARENA", "FUN FEST"])
-    start_date = st.date_input("Start Date")
-    end_date = st.date_input("End Date")
-    account_types = st.multiselect("Account Types", ["CASH", "QR BANK", "TNG", "BNK1", "BNK2", "BNK3"])
-    username = st.session_state.user["username"]
+    with st.form("register_event_form"):
+        st.subheader("Register New Event")
+        event_name = st.text_input("Event Name")
+        job_number = st.text_input("Job Number")
+        event_type = st.selectbox("Event Type", ["MEGA ARENA", "FUN FEST"])
+        start_date = st.date_input("Start Date")
+        end_date = st.date_input("End Date")
+        account_types = st.multiselect("Account Types", ["CASH", "QR BANK", "TNG", "BNK1", "BNK2", "BNK3"])
+        username = st.session_state.user["username"]
     
-    submit = st.form_submit_button("Save Event")
+        submit = st.form_submit_button("Save Event")
 
-    if submit:
-        if not event_name or not account_types:
-            st.warning("Please fill all required fields and select at least one account type.")
-        else:
-            duration = (end_date - start_date).days + 1
-            event_id = "EVT" + datetime.now().strftime("%Y%m%d%H%M%S")
-            # Prepare data dict based on your sheet headers
-            data = {
-                "event_id": event_id,
-                "timestamp": datetime.now(),
-                "created_by": username,
-                "event_name": event_name,
-                "job_number": job_number,
-                "event_type": event_type,
-                "start_date": start_date,
-                "end_date": end_date,
-                "duration": duration,
-                "account_types": ",".join(account_types),
-                "status": "active"
-            }
+        if submit:
+            if not event_name or not account_types:
+                st.warning("Please fill all required fields and select at least one account type.")
+            else:
+                duration = (end_date - start_date).days + 1
+                event_id = "EVT" + datetime.now().strftime("%Y%m%d%H%M%S")
+                # Prepare data dict based on your sheet headers
+                data = {
+                    "event_id": event_id,
+                    "timestamp": datetime.now(),
+                    "created_by": username,
+                    "event_name": event_name,
+                    "job_number": job_number,
+                    "event_type": event_type,
+                    "start_date": start_date,
+                    "end_date": end_date,
+                    "duration": duration,
+                    "account_types": ",".join(account_types),
+                    "status": "active"
+                }
 
-            # Append using header-aware function
-            append_row_by_header(SHEET_ID, EVENT_SHEET, data)
+                # Append using header-aware function
+                append_row_by_header(SHEET_ID, EVENT_SHEET, data)
 
-            st.success(f"✅ Event '{event_name}' registered successfully!")
+                st.success(f"✅ Event '{event_name}' registered successfully!")
 
-            # Optionally, reload active events if needed
-            st.experimental_rerun()
+                # Optionally, reload active events if needed
+                st.experimental_rerun()
 
 
 
