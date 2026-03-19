@@ -295,7 +295,7 @@ if st.button("➕ Register Event"):
             st.rerun()
 
 
-active_events = df_event[df_event["status"] == "active"]
+active_events = df_events[df_events["status"] == "active"]
 
 if active_events.empty:
     st.info("No active events found. Please register an event first.")
