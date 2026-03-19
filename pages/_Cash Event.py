@@ -2,12 +2,14 @@ import streamlit as st
 import pandas as pd
 from datetime import datetime, timedelta
 from utils.sheets import read_sheet, get_client
-client = get_client()
+import os
+import json
 from streamlit_calendar import calendar
 
 # -----------------------------
 # LOGIN CHECK
 # -----------------------------
+
 if "user" not in st.session_state or st.session_state.user is None:
     st.warning("❌ You must log in first to access this page.")
     st.stop()
@@ -15,9 +17,8 @@ if "user" not in st.session_state or st.session_state.user is None:
 if st.session_state.user.get("role") != "admin":
     st.error("🚫 You do not have permission to access this page.")
     st.stop()
-
-import os
-import json
+    
+client = get_client()
 
 # Google Service Account
 google_creds = {
@@ -37,33 +38,205 @@ cloudinary_config = {
 # -----------------------------
 # PAGE TITLE
 # -----------------------------
-st.title("🎪 Event Cash Flow Management")
 
+st.title("🎪 Event Cash Flow Management")
 
 # -----------------------------
 # CONNECT TO GOOGLE SHEET
 # -----------------------------
+
 SHEET_ID = "1qw_0cW4ipW5eYh1_sqUyvZdIcjmYXLcsS4J6Y4NoU6A"
 EVENTLIST_SHEET = "Event_List"
-CASHFLOW_SHEET = "Event_Cashflow"
+TXN_SHEET = "Event_Txn"
+ACCOUNT_SHEET = "Event_Account"
+
 username = st.session_state.user["username"]
+
 # ---------------------------------
 # LOAD EVENT LIST
 # ---------------------------------
 
 @st.cache_data(ttl=60)
-def load_events():
 
-    url = f"https://docs.google.com/spreadsheets/d/{SHEET_ID}/gviz/tq?tqx=out:csv&sheet={EVENTLIST_SHEET}"
+def load_sheet(sheet):
+
+    sheet = urllib.parse.quote(sheet)
+
+    url = f"https://docs.google.com/spreadsheets/d/{SHEET_ID}/gviz/tq?tqx=out:csv&sheet={sheet}"
+
     df = pd.read_csv(url)
-    
-    df["start_date"] = pd.to_datetime(df["start_date"], errors="coerce")
-    df["end_date"] = pd.to_datetime(df["end_date"], errors="coerce")
+
+    df.columns = df.columns.str.strip()
 
     return df
+    
+df_list = load_sheet(Event_List)
+df_accounts = load_sheet(Event_Account)
+df_txn = load_sheet(Event_Txn)
 
 
-df_event = load_events()
+# -----------------------------
+# SELECT EVENT
+# -----------------------------
+active_events = df_events[df_events["status"] == "active"]
+
+if active_events.empty:
+    st.info("No active events")
+    st.stop()
+
+selected_event = st.selectbox(
+    "Select Event",
+    active_events["event_name"]
+)
+
+event_row = active_events[
+    active_events["event_name"] == selected_event
+].iloc[0]
+
+event_id = event_row["event_id"]
+
+start_date = pd.to_datetime(event_row["start_date"]).date()
+end_date = pd.to_datetime(event_row["end_date"]).date()
+
+# -----------------------------
+# LOAD ACCOUNTS
+# -----------------------------
+event_accounts = df_accounts[
+    df_accounts["event_id"] == event_id
+]["account_type"].tolist()
+
+# -----------------------------
+# PREPARE TRANSACTION DATA
+# -----------------------------
+df_txn["date"] = pd.to_datetime(df_txn["date"], errors="coerce")
+
+event_txn = df_txn[df_txn["event_id"] == event_id]
+
+daily = event_txn.groupby(["date", "type"])["amount"].sum().reset_index()
+
+# -----------------------------
+# GENERATE CALENDAR EVENTS
+# -----------------------------
+events = []
+
+current = start_date
+
+while current <= end_date:
+
+    day_data = daily[daily["date"] == pd.to_datetime(current)]
+
+    total_in = day_data[day_data["type"] == "IN"]["amount"].sum()
+    total_out = day_data[day_data["type"] == "OUT"]["amount"].sum()
+
+    title = selected_event
+
+    if total_in > 0 or total_out > 0:
+        title += f"\n💰 {total_in:,.0f} | 💸 {total_out:,.0f}"
+
+    events.append({
+        "title": title,
+        "start": current.strftime("%Y-%m-%d"),
+        "end": current.strftime("%Y-%m-%d")
+    })
+
+    current += timedelta(days=1)
+
+calendar_event = calendar(
+    events=events,
+    options={
+        "initialView": "dayGridMonth",
+        "height": 650
+    }
+)
+
+selected_date = None
+
+if calendar_event and "dateClick" in calendar_event:
+
+    selected_date = datetime.strptime(
+        calendar_event["dateClick"]["date"],
+        "%Y-%m-%d"
+    ).date()
+
+# -----------------------------
+# TRANSACTION ENTRY
+# -----------------------------
+if selected_date:
+
+    st.subheader(f"Add Transaction ({selected_date})")
+
+    with st.form("txn_form"):
+
+        txn_type = st.selectbox(
+            "Type",
+            ["IN", "OUT"]
+        )
+
+        account = st.selectbox(
+            "Account",
+            event_accounts
+        )
+
+        category = st.text_input("Category")
+
+        item = st.text_input("Item")
+
+        amount = st.number_input(
+            "Amount",
+            min_value=0.0
+        )
+
+        submit_txn = st.form_submit_button("Save Transaction")
+
+    if submit_txn:
+
+        txn_id = "TXN" + datetime.now().strftime("%Y%m%d%H%M%S")
+
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+        txn_sheet = client.open_by_key(SHEET_ID).worksheet(EVENT_TXN)
+
+        headers = txn_sheet.row_values(1)
+
+        row_data = {
+            "txn_id": txn_id,
+            "timestamp": timestamp,
+            "username": username,
+            "event_id": event_id,
+            "date": selected_date.strftime("%Y-%m-%d"),
+            "account": account,
+            "type": txn_type,
+            "category": category,
+            "item": item,
+            "amount": amount,
+            "receipt_url": ""
+        }
+
+        row = [row_data.get(col, "") for col in headers]
+
+        txn_sheet.append_row(row, value_input_option="USER_ENTERED")
+
+        st.success("Transaction Saved")
+
+        st.cache_data.clear()
+
+        st.rerun()
+
+# -----------------------------
+# LEDGER VIEW
+# -----------------------------
+st.subheader("Ledger")
+
+ledger = event_txn.sort_values("date")
+
+st.dataframe(ledger)
+
+total_in = ledger[ledger["type"] == "IN"]["amount"].sum()
+total_out = ledger[ledger["type"] == "OUT"]["amount"].sum()
+
+st.metric("Total In", f"RM {total_in:,.2f}")
+st.metric("Total Out", f"RM {total_out:,.2f}")
+st.metric("Balance", f"RM {total_in-total_out:,.2f}")
 
 # ---------------------------------
 # REGISTER EVENT POPUP
