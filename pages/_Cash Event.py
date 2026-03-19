@@ -37,8 +37,6 @@ EVENTS_SHEET = "Event_List"
 TXN_SHEET = "Event_Txn"
 ACCOUNT_SHEET = "Event_Account"
 
-@st.cache_data(ttl=60)
-
 # -----------------------------
 # REGISTER EVENT FORM
 # -----------------------------
@@ -78,7 +76,7 @@ if st.button("➕ Register New Event")
                 }
 
                 # Append using header-aware function
-                append_row_by_header(SHEET_ID, EVENT_SHEET, data)
+                append_row_by_header(SHEET_ID, EVENTS_SHEET, data)
 
                 st.success(f"✅ Event '{event_name}' registered successfully!")
 
