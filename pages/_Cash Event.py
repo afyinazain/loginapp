@@ -71,7 +71,7 @@ def load_sheet(sheet):
 
     return df
     
-df_list = load_sheet(EVENTLIST_SHEET)
+df_events = load_sheet(EVENTLIST_SHEET)
 df_accounts = load_sheet(ACCOUNT_SHEET)
 df_txn = load_sheet(TXN_SHEET)
 
