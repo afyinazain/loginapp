@@ -51,7 +51,7 @@ EVENTLIST_SHEET = "Event_List"
 TXN_SHEET = "Event_Txn"
 ACCOUNT_SHEET = "Event_Account"
 
-username = st.session_state.user["username"]
+
 
 # ---------------------------------
 # LOAD EVENT LIST
@@ -60,7 +60,7 @@ username = st.session_state.user["username"]
 @st.cache_data(ttl=60)
 
 def load_sheet(sheet):
-
+    
     sheet = urllib.parse.quote(sheet)
 
     url = f"https://docs.google.com/spreadsheets/d/{SHEET_ID}/gviz/tq?tqx=out:csv&sheet={sheet}"
@@ -85,7 +85,8 @@ if st.button("➕ Register Event"):
 if st.session_state.get("show_event_form", False):
 
     with st.form("event_form"):
-
+        username = st.session_state.user["username"]
+        
         st.subheader("Register New Event")
 
         event_name = st.text_input("Event Name")
@@ -122,7 +123,7 @@ if st.session_state.get("show_event_form", False):
             row_data = {
                 "event_id": event_id,
                 "timestamp": timestamp,
-                "username": username,
+                "created_by": username,
                 "event_name": event_name,
                 "job_number": job_number,
                 "event_type": event_type,
@@ -157,6 +158,8 @@ selected_event = st.selectbox(
     "Select Event",
     active_events["event_name"]
 )
+
+print(active_events["event_name"])
 
 event_row = active_events[
     active_events["event_name"] == selected_event
