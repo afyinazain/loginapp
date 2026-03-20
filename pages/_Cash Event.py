@@ -37,67 +37,71 @@ EVENTS_SHEET = "Event_List"
 TXN_SHEET = "Event_Txn"
 ACCOUNT_SHEET = "Event_Account"
 
+if "show_event_form" not in st.session_state:
+    st.session_state.show_event_form = False
 # -----------------------------
 # REGISTER EVENT FORM
 # -----------------------------
+
 if st.button("➕ Register New Event"):
+    st.session_state.show_event_form = True
+    
+if st.session_state.show_event_form:
 
     with st.form("register_event_form"):
         st.subheader("Register New Event")
+
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        created_by = st.session_state.user["username"]
+        event_id = "EVT" + datetime.now().strftime("%Y%m%d%H%M%S")
+        st.text_input("Event ID", value=event_id, disabled=True)
+        st.text_input("Created By", value=created_by, disabled=True)
+        
         event_name = st.text_input("Event Name")
         job_number = st.text_input("Job Number")
         event_type = st.selectbox("Event Type", ["MEGA ARENA", "FUN FEST"])
         start_date = st.date_input("Start Date")
         end_date = st.date_input("End Date")
+        duration = (end_date - start_date).days + 1
         account_types = st.multiselect("Account Types", ["CASH", "QR BANK", "TNG", "BNK1", "BNK2", "BNK3"])
-        username = st.session_state.user["username"]
+        status = "active"
     
-        submit = st.form_submit_button("Save Event")
+        col1, col2 = st.columns(2)
+
+        submit = col1.form_submit_button("✅ Register Event")
+        cancel = col2.form_submit_button("❌ Cancel")
 
         if submit:
             if not event_name or not account_types:
                 st.warning("Please fill all required fields and select at least one account type.")
             else:
-                duration = (end_date - start_date).days + 1
-                event_id = "EVT" + datetime.now().strftime("%Y%m%d%H%M%S")
-                # Prepare data dict based on your sheet headers
-                data = {
-                    "event_id": event_id,
-                    "timestamp": datetime.now(),
-                    "created_by": username,
-                    "event_name": event_name,
-                    "job_number": job_number,
-                    "event_type": event_type,
-                    "start_date": start_date,
-                    "end_date": end_date,
-                    "duration": duration,
-                    "account_types": ",".join(account_types),
-                    "status": "active"
-                }
-
                 # Append using header-aware function
-                append_row_by_header(sheet_id=SHEET_ID, sheet_name=EVENTS_SHEET,
+                append_row_by_header(
+                    sheet_id=SHEET_ID, 
+                    sheet_name=EVENTS_SHEET,
                     data = {
-                    "event_id": event_id,
-                    "timestamp": datetime.now(),
-                    "created_by": username,
-                    "event_name": event_name,
-                    "job_number": job_number,
-                    "event_type": event_type,
-                    "start_date": start_date,
-                    "end_date": end_date,
-                    "duration": duration,
-                    "account_types": ",".join(account_types),
-                    "status": "active"
-                },
+                        "event_id": event_id,
+                        "timestamp": timestamp,
+                        "created_by": created_by,
+                        "event_name": event_name,
+                        "job_number": job_number,
+                        "event_type": event_type,
+                        "start_date": start_date,
+                        "end_date": end_date,
+                        "duration": duration,
+                        "account_types": ",".join(account_types),
+                        "status": status
+                    },
                     header_row=1
                 )
 
                 st.success(f"✅ Event '{event_name}' registered successfully!")
 
-                # Optionally, reload active events if needed
-                st.experimental_rerun()
-
+                st.session_state.show_event_form = False
+                st.rerun()
+        if cancel:
+            st.session_state.show_event_form = False
+            st.rerun()
 
 # -----------------------------
 # LOAD EVENTS
