@@ -88,6 +88,8 @@ def append_row_by_header(sheet_id: str, sheet_name: str, data: dict, header_row:
 # -----------------------------
 # Read all rows from a sheet
 # -----------------------------
+
+@st.cache_data(ttl=10)  # cache for 10 seconds
 def read_sheet(sheet_id: str, sheet_name: str, header_row: int = 1):
     client = get_client()
     ws = client.open_by_key(sheet_id).worksheet(sheet_name)
