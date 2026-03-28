@@ -5,6 +5,6 @@ gspread
 google-auth
 cloudinary
 requests
-
+plotly
 
 
