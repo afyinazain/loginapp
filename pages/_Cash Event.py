@@ -179,7 +179,7 @@ calendar_result = calendar(
     options={
         "initialView": "dayGridMonth",
         "initialDate": event_start.strftime("%Y-%m-%d"),
-        "height": 400,
+        "height": 300,
         "headerToolbar": False,   # disables top navigation buttons
         "dayMaxEvents": True,
         "editable": False,
