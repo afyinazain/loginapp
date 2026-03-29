@@ -7,6 +7,12 @@ import json
 from streamlit_calendar import calendar
 import urllib.parse
 import uuid
+import plotly.express as px
+
+@st.cache_data(ttl=30)
+def load_sheet(sheet_id, sheet_name):
+    return pd.DataFrame(read_sheet(sheet_id, sheet_name))
+
 # -----------------------------
 # LOGIN CHECK
 # -----------------------------
@@ -106,7 +112,8 @@ if st.session_state.show_event_form:
 # -----------------------------
 # LOAD EVENTS
 # -----------------------------
-df_events = pd.DataFrame(read_sheet(SHEET_ID, EVENTS_SHEET))
+df_events = load_sheet(SHEET_ID, EVENTS_SHEET)
+
 
 # Filter active events
 active_events = df_events[df_events["status"] == "active"]
@@ -129,6 +136,7 @@ if selected_event == "-- Select Event --":
     st.info("Please select an event to continue.")
     st.stop()
 
+
 event_row = active_events[active_events["event_name"] == selected_event].iloc[0]
 event_id = event_row["event_id"]
 event_name = event_row["event_name"]
@@ -140,8 +148,19 @@ event_accounts = [a.strip()
 
 event_start = pd.to_datetime(event_row["start_date"]).date()
 event_end = pd.to_datetime(event_row["end_date"]).date()
+
+
+if "last_event_id" not in st.session_state:
+    st.session_state.last_event_id = None
+
+# If event changed → reset date
+if st.session_state.last_event_id != event_id:
+    if "txn_date" in st.session_state:
+        del st.session_state["txn_date"]
+    st.session_state.last_event_id = event_id
 #-----------------------------------
 events = []
+event_dates = []
 
 current = event_start
 while current <= event_end:
@@ -173,6 +192,79 @@ calendar_result = calendar(
 )
 
 # -----------------------------
+# BAR CHART OF TRANSACTIONS PER EVENT DATE
+# -----------------------------
+st.subheader(f"📊 Transactions Summary for {event_name}")
+
+# Get all event dates
+
+current = event_start
+while current <= event_end:
+    event_dates.append(current)
+    current += timedelta(days=1)
+
+# Load transactions for this event
+try:
+    df_txn = load_sheet(SHEET_ID, TXN_SHEET)
+    df_txn.columns = [c.strip() for c in df_txn.columns]  # normalize
+    df_txn["date"] = pd.to_datetime(df_txn["date"], errors="coerce").dt.date
+    df_txn["amount"] = pd.to_numeric(df_txn["amount"], errors="coerce").fillna(0)
+    # Create total column (IN = +, OUT = -)
+    df_txn["total"] = df_txn.apply(
+        lambda row: row["amount"] if row["type"] == "IN" else -row["amount"],
+        axis=1
+    )
+    df_sales_txn = df_txn[(df_txn["event_id"] == event_id) & (df_txn["item"] == "Sales")]
+    df_expenses_txn = df_txn[(df_txn["event_id"] == event_id) & (df_txn["item"] == "Expenses Event")]
+
+except:
+    df_sales_txn = pd.DataFrame(columns=["date", "amount"])
+
+
+# Prepare summary data
+summary = []
+for day in event_dates:
+    sales_total = df_sales_txn[df_sales_txn["date"] == day]["amount"].sum()
+    expenses_total = df_expenses_txn[df_expenses_txn["date"] == day]["amount"].sum()
+    
+    summary.append({"date": day.strftime("%Y-%m-%d"), "Sales": round(sales_total, 0),"Expenses": round(-expenses_total, 0)})
+
+df_summary = pd.DataFrame(summary)
+
+total_sales_sum = df_summary["Sales"].sum()
+total_expenses_sum = abs(df_summary["Expenses"].sum())  # make positive for display
+
+
+# Plot bar chart
+fig = px.bar(
+    df_summary,
+    x="date",
+    y=["Sales", "Expenses"],  # both renamed columns
+    barmode="relative",
+    text_auto=".2f",
+    labels={"value": "Amount (RM)", "date": "Event Date"},
+    title=f"Cashflow per Day for {event_name}"
+)
+fig.update_traces(
+    selector=dict(name="Sales"),
+    marker_color="green"
+)
+
+fig.update_traces(
+    selector=dict(name="Expenses"),
+    marker_color="red"
+)
+
+fig.add_hline(y=0, line_color="black")
+fig.update_layout(xaxis_tickangle=-45)
+
+st.plotly_chart(fig, use_container_width=True)
+
+col1, col2 = st.columns(2)
+
+col1.metric("Total Sales", f"RM {total_sales_sum:,.2f}")
+col2.metric("Total Expenses", f"RM {total_expenses_sum:,.2f}")
+# -----------------------------
 # INITIALIZE
 # -----------------------------
 if "txn_data" not in st.session_state:
@@ -191,9 +283,18 @@ if "show_txn_form" not in st.session_state:
 
 with st.expander("Submit Transactions", expanded=st.session_state.show_txn_form):
     # Date input
+    today = datetime.today().date()
+
+    # Only set default if no value exists
+    if "txn_date" not in st.session_state:
+        if event_start <= today <= event_end:
+            st.session_state.txn_date = today
+        else:
+            st.session_state.txn_date = event_start
+
     st.session_state.txn_data["date"] = st.date_input(
         "Transaction Date",
-        value=st.session_state.txn_data.get("date", event_start),
+        value=st.session_state.txn_date,
         min_value=event_start,
         max_value=event_end,
         key="txn_date"
@@ -250,9 +351,13 @@ with st.expander("Submit Transactions", expanded=st.session_state.show_txn_form)
     with col2:
         amount = st.number_input(
             "Amount (RM)",
-            step=10,
+            min_value=0.0,
+            step=10.00,
+            format="%.2f",
             key="txn_amount"
         )
+        amount = round(float(amount), 2)
+        total = round(amount if type == "IN" else -amount, 2)
 
         for_account = st.selectbox(
             "For Account",
@@ -284,6 +389,7 @@ with st.expander("Submit Transactions", expanded=st.session_state.show_txn_form)
             "item": items,
             "category": category,
             "amount": amount,
+            "total": total,
             "for_account": for_account,
             "receipt": receipt.name if st.session_state.txn_data.get("receipt") else ""
         }
@@ -295,6 +401,9 @@ with st.expander("Submit Transactions", expanded=st.session_state.show_txn_form)
             data=data,
             header_row=1
         )
+
+        # clear cache so new data shows
+        st.cache_data.clear()
         
         st.success(f"✅ Transaction ** ({type}) RM{amount} ** submitted! ")
         st.session_state.txn_data = {}
@@ -312,7 +421,9 @@ with st.expander("Submit Transactions", expanded=st.session_state.show_txn_form)
                 del st.session_state[key]
 
         st.session_state.show_txn_form = False
-        
+    
+
+
         
 
 
@@ -321,113 +432,43 @@ with st.expander("Submit Transactions", expanded=st.session_state.show_txn_form)
 # -----------------------------
 # SHOW TODAY'S ACTIVITY FROM GOOGLE SHEET
 # -----------------------------
-st.subheader("📋 Today's Transactions")
+st.markdown("Latest Transaction")
+
 
 try:
-    df_txn = pd.DataFrame(read_sheet(SHEET_ID, TXN_SHEET))
+    df_txn = load_sheet(SHEET_ID, TXN_SHEET)
+
     if not df_txn.empty:
         # Normalize column names
         df_txn.columns = [c.strip() for c in df_txn.columns]
 
-        if "date" not in df_txn.columns:
-            st.warning("⚠ 'date' column not found in sheet. Check your sheet headers.")
-        else:
-            today_str = datetime.today().strftime("%Y-%m-%d")
-            # Convert all dates to string
-            df_txn["date"] = df_txn["date"].astype(str)
-            df_today = df_txn[df_txn["date"] == today_str]
+        # Ensure required columns exist
+        required_cols = ["timestamp", "type", "amount", "account_name","date"]
+        missing_cols = [col for col in required_cols if col not in df_txn.columns]
 
-            if df_today.empty:
-                st.info("No transactions recorded today yet.")
-            else:
-                for _, txn in df_today.iterrows():
-                    st.markdown(
-                        f"- **{txn.get('type','')}** | {txn.get('items','')} | {txn.get('category','')} | RM {txn.get('amount','')} | Account: {txn.get('for_account','')}"
-                    )
+        if missing_cols:
+            st.warning(f"⚠ Missing columns: {missing_cols}")
+        else:
+            # Convert timestamp to datetime for sorting
+            df_txn["timestamp"] = pd.to_datetime(df_txn["timestamp"], errors="coerce")
+
+            # Sort latest first
+            df_txn = df_txn.sort_values(by="timestamp", ascending=False)
+
+            # Get latest 5
+            df_latest = df_txn.head(5)
+
+            # Display
+            for _, txn in df_latest.iterrows():
+                st.markdown(
+                    f"- **{txn.get('type','')}** | RM {txn.get('amount','')} | {txn.get('account_name','')} | {txn.get('date','')}"
+                )
     else:
         st.info("No transactions recorded yet.")
+
 except Exception as e:
     st.error(f"Error fetching transactions: {e}")
 
-import plotly.express as px
 
-# -----------------------------
-# BAR CHART OF TRANSACTIONS PER EVENT DATE
-# -----------------------------
-st.subheader(f"📊 Transactions Summary for {event_name}")
 
-# Get all event dates
-event_dates = []
-current = event_start
-while current <= event_end:
-    event_dates.append(current)
-    current += timedelta(days=1)
 
-# Load transactions for this event
-try:
-    df_txn = pd.DataFrame(read_sheet(SHEET_ID, TXN_SHEET))
-    df_txn.columns = [c.strip() for c in df_txn.columns]  # normalize
-    df_txn["date"] = pd.to_datetime(df_txn["date"], errors="coerce").dt.date
-    df_txn["amount"] = pd.to_numeric(df_txn["amount"], errors="coerce").fillna(0)
-    df_event_txn = df_txn[df_txn["event_id"] == event_id]
-except:
-    df_event_txn = pd.DataFrame(columns=["date", "amount"])
-
-# Prepare summary data
-summary = []
-for day in event_dates:
-    total = df_event_txn[df_event_txn["date"] == day]["amount"].sum()
-    summary.append({"date": day.strftime("%Y-%m-%d"), "total_amount": total})
-
-df_summary = pd.DataFrame(summary)
-
-# Plot bar chart
-fig = px.bar(
-    df_summary,
-    x="date",
-    y="total_amount",
-    text="total_amount",
-    labels={"date": "Event Date", "total_amount": "Total Transaction (RM)"},
-    title=f"Total Transactions per Day for {event_name}"
-)
-fig.update_traces(textposition="outside")
-fig.update_layout(xaxis_tickangle=-45)
-
-st.plotly_chart(fig, use_container_width=True)
-
-# -----------------------------
-# EVENT TRANSACTION SUMMARY TABLE
-# -----------------------------
-st.subheader(f"📋 Transaction Summary for {event_name}")
-
-# Get all event dates
-event_dates = []
-current = event_start
-while current <= event_end:
-    event_dates.append(current)
-    current += timedelta(days=1)
-
-# Load transactions for this event
-df_txn = pd.DataFrame(read_sheet(SHEET_ID, TXN_SHEET))
-if not df_txn.empty:
-    df_txn.columns = [c.strip() for c in df_txn.columns]  # normalize
-    df_txn["date"] = pd.to_datetime(df_txn["date"], errors="coerce").dt.date
-    df_txn["amount"] = pd.to_numeric(df_txn["amount"], errors="coerce").fillna(0)
-    df_event_txn = df_txn[df_txn["event_id"] == event_id]
-else:
-    df_event_txn = pd.DataFrame(columns=["date", "amount"])
-
-# Prepare summary data
-summary = []
-for day in event_dates:
-    day_txn = df_event_txn[df_event_txn["date"] == day]
-    summary.append({
-        "Date": day.strftime("%Y-%m-%d"),
-        "Total Transactions": len(day_txn),
-        "Total Amount (RM)": day_txn["amount"].sum()
-    })
-
-df_summary = pd.DataFrame(summary)
-
-# Show the summary table
-st.dataframe(df_summary)
