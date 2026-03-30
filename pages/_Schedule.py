@@ -235,7 +235,7 @@ for i, day in enumerate(flat_dates):
                         font-size:12px;
                         margin-bottom:4px;
                         color:white;">
-                        {item} - {bil_jam}
+                        {branch} - {item} - {bil_jam} - {salesperson}
                     </div>
                     """,
                     unsafe_allow_html=True
