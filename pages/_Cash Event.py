@@ -370,8 +370,12 @@ if "txn_data" not in st.session_state:
 #--------------form---------------------
 #-------------------------------------------------
 
-if "show_txn_form1" not in st.session_state:
-    st.session_state.show_txn_form1 = False
+with st.container():
+    col1, col2 = st.columns([8,1])
+    with col2:
+        if st.button("➕New Transaction", use_container_width=True):
+            st.session_state.show_txn_form1 = True
+
     
 if st.button("➕New Transaction"):
     st.session_state.show_txn_form1 = True
