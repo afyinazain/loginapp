@@ -194,7 +194,7 @@ while current <= event_end:
 # -----------------------------
 # BAR CHART OF TRANSACTIONS PER EVENT DATE
 # -----------------------------
-st.subheader(f"📊 Transactions Summary")
+
 
 # Get all event dates
 
@@ -235,8 +235,9 @@ total_sales_sum = df_summary["Sales"].sum()
 total_expenses_sum = abs(df_summary["Expenses"].sum())  # make positive for display
 
 
+
 # Plot bar chart
-fig = px.bar(
+fig1 = px.bar(
     df_summary,
     x="date",
     y=["Sales", "Expenses"],  # both renamed columns
@@ -245,104 +246,112 @@ fig = px.bar(
     labels={"value": "Amount (RM)", "date": "Event Date"},
     title=f"Cashflow per Day for {event_name}"
 )
-fig.update_traces(
+fig1.update_traces(
     selector=dict(name="Sales"),
     marker_color="green"
 )
 
-fig.update_traces(
+fig1.update_traces(
     selector=dict(name="Expenses"),
     marker_color="red"
 )
 
-fig.add_hline(y=0, line_color="black")
-fig.update_layout(xaxis_tickangle=-45)
-
-st.plotly_chart(fig, use_container_width=True)
-
+fig1.add_hline(y=0, line_color="black")
+fig1.update_layout(xaxis_tickangle=-45)
 
 
 
 # -----------------------------
 # ACCOUNT BALANCE BAR CHART
 # -----------------------------
-st.subheader(f"🏦 Account Balances")
 
-with st.container(border=True):  # ✅ BOX
 
-    try:
-        if not df_txn.empty:
-            df_txn.columns = [c.strip() for c in df_txn.columns]
+try:
+    if not df_txn.empty:
+        
 
-            # Ensure numeric
-            df_txn["total"] = pd.to_numeric(df_txn["total"], errors="coerce").fillna(0)
+    # Ensure numeric
+        df_txn["total"] = pd.to_numeric(df_txn["total"], errors="coerce").fillna(0)
 
-            # Filter event
-            df_event_txn = df_txn[df_txn["event_id"] == event_id]
+        # Filter event
+        df_event_txn = df_txn[df_txn["event_id"] == event_id]
 
-            # Group by account
-            df_account = (
-                df_event_txn
-                .groupby("for_account")["total"]
-                .sum()
-                .reset_index()
-                .sort_values(by="total", ascending=True)
-            )
+        # Group by account
+        df_account = (
+            df_event_txn
+            .groupby("for_account")["total"]
+            .sum()
+            .reset_index()
+            .sort_values(by="total", ascending=True)
+        )
 
-            import plotly.express as px
+        
 
-            fig = px.bar(
-                df_account,
-                x="total",
-                y="for_account",
-                orientation="h",
-                text=df_account["total"].map(lambda x: f"{x:,.2f}"),
-                labels={"total": "Balance (RM)", "for_account": "Account"},
-                title="Account Balance Distribution"
-            )
+        fig2 = px.bar(
+            df_account,
+            x="total",
+            y="for_account",
+            orientation="h",
+            text=df_account["total"].map(lambda x: f"{x:,.2f}"),
+            labels={"total": "Balance (RM)", "for_account": "Account"},
+            title="Account Balance Distribution"
+        )
 
             # ✅ Thinner bars
-            fig.update_traces(
-                width=0.4,  # default ~0.8 → smaller = thinner
-                marker_color=[
-                    "green" if val >= 0 else "red"
-                    for val in df_account["total"]
-                ]
-            )
+        fig2.update_traces(
+            width=0.4,  # default ~0.8 → smaller = thinner
+            marker_color=[
+                "green" if val >= 0 else "red"
+                for val in df_account["total"]
+            ]
+        )
 
             # ✅ Show axes clearly
-            fig.update_layout(
-                xaxis=dict(
-                    title="Balance (RM)",
-                    showgrid=True,
-                    zeroline=True
-                ),
-                yaxis=dict(
-                    title="Account",
-                    showgrid=False
-                ),
-                plot_bgcolor="white"
-            )
+        fig2.update_layout(
+            xaxis=dict(
+                title="Balance (RM)",
+                showgrid=True,
+                zeroline=True
+            ),
+            yaxis=dict(
+                title="Account",
+                showgrid=False
+            ),
+            plot_bgcolor="white"
+        )
 
-            # Optional: zero line for clarity
-            fig.add_vline(x=0, line_color="black")
+        # Optional: zero line for clarity
+        fig2.add_vline(x=0, line_color="black")
 
-            st.plotly_chart(fig, use_container_width=True)
+        
 
-        else:
-            st.info("No transaction data available.")
+    else:
+        st.info("No transaction data available.")
 
-    except Exception as e:
-        st.error(f"Error generating account chart: {e}")
+except Exception as e:
+    st.error(f"Error generating account chart: {e}")
+
+col_left, col_right = st.columns(2)
+
+with col_left:
+    st.subheader(f"📊 Transactions Summary")
+    with st.container(border=True):
+        st.plotly_chart(fig1, use_container_width=True)
+
+with col_right:
+    st.subheader(f"🏦 Account Balances")
+    with st.container(border=True):
+        st.plotly_chart(fig2, use_container_width=True)
+
 
 
 total_balance = df_account["total"].sum()
 
 col1, col2, col3 = st.columns(3)
 
-col1.metric("Total Sales", f"RM {total_sales_sum:,.2f}")
-col2.metric("Total Expenses", f"RM {total_expenses_sum:,.2f}")
-col3.metric("Total Cash Available", f"RM {total_balance:,.2f}")
+col1.metric("💰 Sales", f"RM {total_sales_sum:,.2f}")
+col2.metric("💸 Expenses", f"RM {total_expenses_sum:,.2f}")
+col3.metric("🏦 Balance", f"RM {total_balance:,.2f}")
 
 
 
@@ -360,159 +369,166 @@ if "txn_data" not in st.session_state:
 #-------------------------------------------------
 #--------------form---------------------
 #-------------------------------------------------
-# -----------------------------
-# PAGE TITLE
-# -----------------------------
 
-st.title("💰 Event Cash Flow")
+if "show_txn_form1" not in st.session_state:
+    st.session_state.show_txn_form1 = False
+    
+if st.button("➕New Transaction"):
+    st.session_state.show_txn_form1 = True
 
-if "show_txn_form" not in st.session_state:
-    st.session_state.show_txn_form = True
+if st.session_state.show_txn_form1:
+    with st.form("submit_txn_form"):
+        st.subheader("Submit Transaction")
+        today = datetime.today().date()
+        # Only set default if no value exists
+        if "txn_date" not in st.session_state:
+            
+            if event_start <= today <= event_end:
+                st.session_state.txn_date = today
+            else:
+                st.session_state.txn_date = event_start
 
-with st.expander("Submit Transactions", expanded=st.session_state.show_txn_form):
-    # Date input
-    today = datetime.today().date()
-
-    # Only set default if no value exists
-    if "txn_date" not in st.session_state:
-        if event_start <= today <= event_end:
-            st.session_state.txn_date = today
-        else:
-            st.session_state.txn_date = event_start
-
-    st.session_state.txn_data["date"] = st.date_input(
-        "Transaction Date",
-        value=st.session_state.txn_date,
-        min_value=event_start,
-        max_value=event_end,
-        key="txn_date"
-    )
-
-    st.write(f"Transactions will be recorded for: **{st.session_state.txn_date}**")
-    st.markdown("---")
-
-    # Two-column layout
-    col1, col2 = st.columns(2)
-
-    with col1:
-        type = st.selectbox(
-            "Type",
-            ["-- Select Type --","IN", "OUT"],
-            key="txn_type"
+        st.session_state.txn_data["date"] = st.date_input(
+            "Transaction Date",
+            value=st.session_state.txn_date,
+            min_value=event_start,
+            max_value=event_end,
+            key="txn_date"
         )
 
-        if type == "IN":
+        st.write(f"Transactions will be recorded for: **{st.session_state.txn_date}**")
+        st.markdown("---")
+        
 
-            items = st.selectbox(
-                "Items",
-                ["-- Select Item --","Sales", "Petty Cash", "Others"],
-                key=f"txn_items"
+        # Two-column layout
+        col1, col2 = st.columns(2)
+
+        with col1:
+            type = st.selectbox(
+                "Type",
+                ["-- Select Type --","IN", "OUT"],
+                key="txn_type"
             )
+    
+            if type == "IN":
 
-            category = st.selectbox(
-            "Category",
-            ["-- Select Category --","Sales Event", "Petty Cash"],
-            key=f"txn_category"
-        )
-        else:
-            items = st.selectbox(
-                "Items",
-                ["-- Select Item --","Expenses Event", "Petty Cash", "Others"],
-                key=f"txn_items"
-            )
+                items = st.selectbox(
+                    "Items",
+                    ["-- Select Item --","Sales", "Petty Cash", "Others"],
+                    key=f"txn_items"
+                )
 
-            category = st.selectbox(
+                category = st.selectbox(
                 "Category",
-                [   
-                    "-- Select Category --",
-                    "Petrol/Diesel",
-                    "Land Rental",
-                    "Utilities",
-                    "Purchase - tools/equipment",
-                    "Accommodation",
-                    "Others"
-                ],
+                ["-- Select Category --","Sales Event", "Petty Cash"],
                 key=f"txn_category"
             )
+            else:
+                items = st.selectbox(
+                    "Items",
+                    ["-- Select Item --","Expenses Event", "Petty Cash", "Others"],
+                    key=f"txn_items"
+                )
+
+                category = st.selectbox(
+                    "Category",
+                    [   
+                        "-- Select Category --",
+                        "Petrol/Diesel",
+                        "Land Rental",
+                        "Utilities",
+                        "Purchase - tools/equipment",
+                        "Accommodation",
+                        "Others"
+                    ],
+                    key=f"txn_category"
+                )
 
 
-    with col2:
-        amount = st.number_input(
-            "Amount (RM)",
-            min_value=0.0,
-            step=10.00,
-            format="%.2f",
-            key="txn_amount"
-        )
-        amount = round(float(amount), 2)
-        total = round(amount if type == "IN" else -amount, 2)
+        with col2:
+            amount = st.number_input(
+                "Amount (RM)",
+                min_value=0.0,
+                step=10.00,
+                format="%.2f",
+                key="txn_amount"
+            )
+            amount = round(float(amount), 2)
+            total = round(amount if type == "IN" else -amount, 2)
 
-        for_account = st.selectbox(
-            "For Account",
-            ["-- Select Account --"] + event_accounts,
-            index=0,
-            key="txn_account"
-        )
+            for_account = st.selectbox(
+                "For Account",
+                ["-- Select Account --"] + event_accounts,
+                index=0,
+                key="txn_account"
+            )
 
-        receipt = st.file_uploader(
-            "Receipt",
-            type=["jpg","png","jpeg"],
-            key="txn_receipt"
-        )
-    st.markdown("---")
-    if st.button("✅ Submit Transaction"):
-        if type == "-- Select Type --" or items == "-- Select Item --" or category == "-- Select Category --" or for_account == "-- Select Account --":
-            st.warning("⚠ Please complete all fields before submitting.")
-            st.stop()
+            receipt = st.file_uploader(
+                "Receipt",
+                type=["jpg","png","jpeg"],
+                key="txn_receipt"
+            )
+        st.markdown("---")
+
+        col1, col2 = st.columns(2)
+
+        submit = col1.form_submit_button("✅ Submit Transaction")
+        cancel = col2.form_submit_button("❌ Cancel")
+
+        if submit:
+            if type == "-- Select Type --" or items == "-- Select Item --" or category == "-- Select Category --" or for_account == "-- Select Account --":
+                st.warning("⚠ Please complete all fields before submitting.")
+                st.stop()
         # --- Prepare data to append ---
-        txn_id = str(uuid.uuid4())[:10]
-        data = {
-            "txn_id": txn_id,
-            "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-            "event_id": event_id,
-            "account_name": selected_event,
-            "username":st.session_state.user["username"],
-            "date": st.session_state.txn_data["date"].strftime("%Y-%m-%d"),
-            "type": type,
-            "item": items,
-            "category": category,
-            "amount": amount,
-            "total": total,
-            "for_account": for_account,
-            "receipt": receipt.name if st.session_state.txn_data.get("receipt") else ""
-        }
+            txn_id = str(uuid.uuid4())[:10]
+            data = {
+                "txn_id": txn_id,
+                "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                "event_id": event_id,
+                "account_name": selected_event,
+                "username":st.session_state.user["username"],
+                "date": st.session_state.txn_data["date"].strftime("%Y-%m-%d"),
+                "type": type,
+                "item": items,
+                "category": category,
+                "amount": amount,
+                "total": total,
+                "for_account": for_account,
+                "receipt": receipt.name if st.session_state.txn_data.get("receipt") else ""
+            }
 
-        # --- Append to Google Sheet ---
-        append_row_by_header(
-            sheet_id=SHEET_ID,
-            sheet_name=TXN_SHEET,
-            data=data,
-            header_row=1
-        )
+            # --- Append to Google Sheet ---
+            append_row_by_header(
+                sheet_id=SHEET_ID,
+                sheet_name=TXN_SHEET,
+                data=data,
+                header_row=1
+            )
 
-        # clear cache so new data shows
-        st.cache_data.clear()
+            # clear cache so new data shows
+            st.cache_data.clear()
         
-        st.success(f"✅ Transaction ** ({type}) RM{amount} ** submitted! ")
-        st.session_state.txn_data = {}
-        # delete widget states
-        for key in [
-            "txn_date",
-            "txn_type",
-            "txn_items",
-            "txn_category",
-            "txn_amount",
-            "txn_account",
-            "txn_receipt"
-        ]:
-            if key in st.session_state:
-                del st.session_state[key]
-
-        st.session_state.show_txn_form = False
-    
+            st.success(f"✅ Transaction ** ({type}) RM{amount} ** submitted! ")
+            st.session_state.txn_data = {}
+            # delete widget states
+            for key in [
+                "txn_date",
+                "txn_type",
+                "txn_items",
+                "txn_category",
+                "txn_amount",
+                "txn_account",
+                "txn_receipt"
+            ]:
+                if key in st.session_state:
+                    del st.session_state[key]
 
 
-        
+            st.session_state.show_txn_form1 = False
+            
+        if cancel:
+            st.session_state.show_txn_form1 = False
+            
 
 
 
@@ -520,39 +536,43 @@ with st.expander("Submit Transactions", expanded=st.session_state.show_txn_form)
 # -----------------------------
 # SHOW TODAY'S ACTIVITY FROM GOOGLE SHEET
 # -----------------------------
-st.markdown("Latest Transaction")
+st.markdown("### 🕒Latest Transaction")
 
+with st.container(border=True):
+    try:
+    
+        if not df_txn.empty:
 
-try:
-    df_txn = load_sheet(SHEET_ID, TXN_SHEET)
+            # Ensure required columns exist
+            required_cols = ["timestamp", "type", "amount", "account_name","date","event_id"]
+            missing_cols = [col for col in required_cols if col not in df_txn.columns]
 
-    if not df_txn.empty:
-        # Normalize column names
-        df_txn.columns = [c.strip() for c in df_txn.columns]
-
-        # Ensure required columns exist
-        required_cols = ["timestamp", "type", "amount", "account_name","date"]
-        missing_cols = [col for col in required_cols if col not in df_txn.columns]
-
-        if missing_cols:
-            st.warning(f"⚠ Missing columns: {missing_cols}")
-        else:
-            # Convert timestamp to datetime for sorting
-            df_txn["timestamp"] = pd.to_datetime(df_txn["timestamp"], errors="coerce")
-
-            # Sort latest first
-            df_txn = df_txn.sort_values(by="timestamp", ascending=False)
-
-            # Get latest 5
-            df_latest = df_txn.head(5)
-
-            # Display
-            for _, txn in df_latest.iterrows():
-                st.markdown(
-                    f"- **{txn.get('type','')}** | RM {txn.get('amount','')} | {txn.get('account_name','')} | {txn.get('date','')}"
+            if missing_cols:
+                st.warning(f"⚠ Missing columns: {missing_cols}")
+            else:
+                # Convert timestamp to datetime for sorting
+                df_txn["timestamp"] = pd.to_datetime(df_txn["timestamp"], errors="coerce")
+                df_latest = (
+                    df_txn[df_txn["event_id"] == event_id]   # ✅ explicit filter
+                    .sort_values(by="timestamp", ascending=False)
+                    .head(5)
                 )
-    else:
-        st.info("No transactions recorded yet.")
+                
 
-except Exception as e:
-    st.error(f"Error fetching transactions: {e}")
+                # Get latest 5
+                df_latest = df_latest.head(5)
+                if df_latest.empty:
+                    st.info("No transactions for this event yet.")
+                else:# Display
+                    for _, txn in df_latest.iterrows():
+                        icon = "🟢" if txn["type"] == "IN" else "🔴"
+                    
+                        st.markdown(
+                            f"{icon} **RM {txn['amount']:,.2f}** | {txn['for_account']}  \n"
+                            f"{txn['date']} • {txn['account_name']}"
+                        )
+        else:
+            st.info("No transactions recorded yet.")
+
+    except Exception as e:
+        st.error(f"Error fetching transactions: {e}")
