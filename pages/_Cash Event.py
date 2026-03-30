@@ -393,7 +393,6 @@ if st.session_state.show_txn_form1:
 
         st.session_state.txn_data["date"] = st.date_input(
             "Transaction Date",
-            value=st.session_state.txn_date,
             min_value=event_start,
             max_value=event_end,
             key="txn_date"
