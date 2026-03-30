@@ -174,27 +174,27 @@ while current <= event_end:
     current += timedelta(days=1)
 
 
-calendar_result = calendar(
-    events=events,
-    options={
-        "initialView": "dayGridMonth",
-        "initialDate": event_start.strftime("%Y-%m-%d"),
-        "height": 400,
-        "headerToolbar": False,   # disables top navigation buttons
-        "dayMaxEvents": True,
-        "editable": False,
-        "selectable": False,
-        "fixedWeekCount": True,    # ensures all event dates fit in the month view
-        "navLinks": False,
-        "eventStartEditable": False,
-        "eventDurationEditable": False
-    }
-)
+#calendar_result = calendar(
+#    events=events,
+#    options={
+#        "initialView": "dayGridMonth",
+#        "initialDate": event_start.strftime("%Y-%m-%d"),
+#        "height": 400,
+#        "headerToolbar": False,   # disables top navigation buttons
+#        "dayMaxEvents": True,
+#        "editable": False,
+#        "selectable": False,
+#        "fixedWeekCount": True,    # ensures all event dates fit in the month view
+#        "navLinks": False,
+#        "eventStartEditable": False,
+#        "eventDurationEditable": False
+#    }
+#)
 
 # -----------------------------
 # BAR CHART OF TRANSACTIONS PER EVENT DATE
 # -----------------------------
-st.subheader(f"📊 Transactions Summary for {event_name}")
+st.subheader(f"📊 Transactions Summary")
 
 # Get all event dates
 
@@ -260,13 +260,101 @@ fig.update_layout(xaxis_tickangle=-45)
 
 st.plotly_chart(fig, use_container_width=True)
 
-col1, col2 = st.columns(2)
+
+
+
+# -----------------------------
+# ACCOUNT BALANCE BAR CHART
+# -----------------------------
+st.subheader(f"🏦 Account Balances")
+
+with st.container(border=True):  # ✅ BOX
+
+    try:
+        if not df_txn.empty:
+            df_txn.columns = [c.strip() for c in df_txn.columns]
+
+            # Ensure numeric
+            df_txn["total"] = pd.to_numeric(df_txn["total"], errors="coerce").fillna(0)
+
+            # Filter event
+            df_event_txn = df_txn[df_txn["event_id"] == event_id]
+
+            # Group by account
+            df_account = (
+                df_event_txn
+                .groupby("for_account")["total"]
+                .sum()
+                .reset_index()
+                .sort_values(by="total", ascending=True)
+            )
+
+            import plotly.express as px
+
+            fig = px.bar(
+                df_account,
+                x="total",
+                y="for_account",
+                orientation="h",
+                text=df_account["total"].map(lambda x: f"{x:,.2f}"),
+                labels={"total": "Balance (RM)", "for_account": "Account"},
+                title="Account Balance Distribution"
+            )
+
+            # ✅ Thinner bars
+            fig.update_traces(
+                width=0.4,  # default ~0.8 → smaller = thinner
+                marker_color=[
+                    "green" if val >= 0 else "red"
+                    for val in df_account["total"]
+                ]
+            )
+
+            # ✅ Show axes clearly
+            fig.update_layout(
+                xaxis=dict(
+                    title="Balance (RM)",
+                    showgrid=True,
+                    zeroline=True
+                ),
+                yaxis=dict(
+                    title="Account",
+                    showgrid=False
+                ),
+                plot_bgcolor="white"
+            )
+
+            # Optional: zero line for clarity
+            fig.add_vline(x=0, line_color="black")
+
+            st.plotly_chart(fig, use_container_width=True)
+
+        else:
+            st.info("No transaction data available.")
+
+    except Exception as e:
+        st.error(f"Error generating account chart: {e}")
+
+
+total_balance = df_account["total"].sum()
+
+col1, col2, col3 = st.columns(3)
 
 col1.metric("Total Sales", f"RM {total_sales_sum:,.2f}")
 col2.metric("Total Expenses", f"RM {total_expenses_sum:,.2f}")
+col3.metric("Total Cash Available", f"RM {total_balance:,.2f}")
+
+
+
+
+
+
+
+
 # -----------------------------
 # INITIALIZE
-# -----------------------------
+# ----------------------------
+
 if "txn_data" not in st.session_state:
     st.session_state.txn_data = {}  # current form values
 #-------------------------------------------------
@@ -468,7 +556,3 @@ try:
 
 except Exception as e:
     st.error(f"Error fetching transactions: {e}")
-
-
-
-
