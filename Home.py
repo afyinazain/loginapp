@@ -106,11 +106,13 @@ else:
     col1, col2, col3 = st.columns(3)
     
     with col1:
-        if st.button("📅 View Schedule"):
+        if st.button("📅 Schedule"):
             st.switch_page("pages/_Schedule.py")
+        if st.button("🎪 Events "):
+            st.switch_page("pages/_Cash Event.py")
             
     with col2:
-        if st.button("📝 Submit Order"):
+        if st.button("📝 Orders"):
             st.switch_page("pages/_New Order.py")
 
     with col3:
